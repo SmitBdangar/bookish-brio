@@ -6,7 +6,8 @@
 <section class="posts-feed">
     {% if page_obj %}
     {% for post in page_obj %}
-    <article class="post-card" onclick="window.location.href='{% url 'post_detail' post.pk %}'">
+    <article class="post-card" onclick="window.location.href=this.dataset.url;"
+        data-url="{% url 'post_detail' post.pk %}">
         <div class="post-main">
             <div class="post-meta">
                 <a href="{% url 'public_profile' post.author.username %}" class="post-author"
@@ -32,7 +33,7 @@
             {% endif %}
 
             <div class="post-content-preview"
-                style="font-size: 0.95rem; color: #4a4a4a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                style="font-size: 0.95rem; color: #4a4a4a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-clamp: 3; overflow: hidden;">
                 {{ post.preview_content }}
             </div>
         </div>
@@ -120,7 +121,16 @@
             {% endfor %}
         </ul>
         {% else %}
-        <p style="font-size: 0.85rem; color: var(--text-meta);">No tags found</p>
+        <div style="text-align: center; padding: 12px 0;">
+            <p style="font-size: 0.85rem; color: var(--text-meta); margin-bottom: 12px;">No active trends, but check
+                these out:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                <a href="?q=fiction" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#fiction</a>
+                <a href="?q=poetry" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#poetry</a>
+                <a href="?q=mystery" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#mystery</a>
+                <a href="?q=scifi" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#scifi</a>
+            </div>
+        </div>
         {% endif %}
     </div>
 </div>

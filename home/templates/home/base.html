@@ -15,7 +15,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body
+    class="{% if request.resolver_match.url_name == 'login' %}hide-on-login-page{% elif request.resolver_match.url_name == 'signup' %}hide-on-signup-page{% endif %}">
     <header class="header">
         <div class="header-content">
             <a href="{% url 'index' %}" class="logo-link">
@@ -37,7 +38,9 @@
                     </div>
                 </a>
                 {% else %}
+                {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' %}
                 <a href="{% url 'login' %}" class="btn-orange">Log In</a>
+                {% endif %}
                 {% endif %}
             </div>
         </div>

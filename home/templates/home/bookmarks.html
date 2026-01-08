@@ -17,7 +17,8 @@
     <div class="posts-feed">
         {% if bookmarks %}
         {% for bookmark in bookmarks %}
-        <article class="post-card" onclick="window.location.href='{% url 'post_detail' bookmark.post.pk %}'">
+        <article class="post-card" onclick="window.location.href=this.dataset.url;"
+            data-url="{% url 'post_detail' bookmark.post.pk %}">
             <div class="post-main">
                 <div class="post-meta">
                     <a href="{% url 'public_profile' bookmark.post.author.username %}" class="post-author"
@@ -31,7 +32,7 @@
                 <h2 class="post-title">{{ bookmark.post.title }}</h2>
 
                 <div class="post-content-preview"
-                    style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.95rem; color: #4a4a4a;">
+                    style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; font-size: 0.95rem; color: #4a4a4a;">
                     {{ bookmark.post.preview_content }}
                 </div>
             </div>

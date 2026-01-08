@@ -4,71 +4,116 @@
 
 {% block content %}
 <div
-    style="background: white; border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 16px;">
-    <h2 style="font-size: 1.1rem; font-weight: 600;">Results for "{{ query }}"</h2>
-    <p style="font-size: 0.85rem; color: var(--text-meta);">Found {{ page_obj.paginator.count }} results</p>
+    style="background: white; border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-soft);">
+    <h2 style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px;">Results for
+        "{{search_query}}"</h2>
+    <p style="font-size: 0.9rem; color: var(--text-meta);">Found {{page_obj.paginator.count}} results</p>
 </div>
 
-<div class="search-filters"
-    style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
-    <a href="?q={{ query }}&type=all" class="btn-orange {% if search_type == 'all' %}active{% endif %}"
-        style="background: {% if search_type == 'all' %}var(--primary){% else %}#f6f7f8{% endif %}; color: {% if search_type == 'all' %}white{% else %}var(--text-meta){% endif %}; padding: 6px 16px; font-size: 0.8rem;">All</a>
-    <a href="?q={{ query }}&type=posts" class="btn-orange"
-        style="background: {% if search_type == 'posts' %}var(--primary){% else %}#f6f7f8{% endif %}; color: {% if search_type == 'posts' %}white{% else %}var(--text-meta){% endif %}; padding: 6px 16px; font-size: 0.8rem;">Posts</a>
-    <a href="?q={{ query }}&type=tags" class="btn-orange"
-        style="background: {% if search_type == 'tags' %}var(--primary){% else %}#f6f7f8{% endif %}; color: {% if search_type == 'tags' %}white{% else %}var(--text-meta){% endif %}; padding: 6px 16px; font-size: 0.8rem;">Tags</a>
-    <a href="?q={{ query }}&type=authors" class="btn-orange"
-        style="background: {% if search_type == 'authors' %}var(--primary){% else %}#f6f7f8{% endif %}; color: {% if search_type == 'authors' %}white{% else %}var(--text-meta){% endif %}; padding: 6px 16px; font-size: 0.8rem;">Authors</a>
+<div class="search-filters" style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding: 4px 0;">
+    <a href="?q={{search_query}}&type=all" class="filter-chip {% if search_type == 'all' %}active{% endif %}">All</a>
+    <a href="?q={{search_query}}&type=posts"
+        class="filter-chip {% if search_type == 'posts' %}active{% endif %}">Posts</a>
+    <a href="?q={{search_query}}&type=tags" class="filter-chip {% if search_type == 'tags' %}active{% endif %}">Tags</a>
+    <a href="?q={{search_query}}&type=authors"
+        class="filter-chip {% if search_type == 'authors' %}active{% endif %}">Authors</a>
 </div>
 
 <section class="results-feed">
     {% for post in page_obj %}
-    <article class="post-card" onclick="window.location.href='{% url 'post_detail' post.pk %}'">
+    <article class="post-card" onclick="window.location.href=this.dataset.url;"
+        data-url="{% url 'post_detail' post.pk %}">
         <div class="post-main">
             <div class="post-meta">
                 <a href="{% url 'public_profile' post.author.username %}" class="post-author"
                     onclick="event.stopPropagation();">
-                    u/{{ post.author.username }}
+                    u/{{post.author.username}}
                 </a>
                 <span>•</span>
-                <span>{{ post.created_at|timesince }} ago</span>
+                <span>{{post.created_at|timesince}} ago</span>
             </div>
-            <h2 class="post-title">{{ post.title }}</h2>
+
+            <h2 class="post-title">{{post.title}}</h2>
+
+            {% if post.image %}
+            <div class="post-image"
+                style="margin: -12px -12px 12px -12px; max-height: 400px; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                <img src="{{post.image.url}}" alt="{{post.title}}" style="width: 100%; height: auto; display: block;">
+            </div>
+            {% endif %}
+
             <div class="post-content-preview"
-                style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.9rem; color: #4a4a4a;">
-                {{ post.preview_content }}
+                style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-clamp: 3; overflow: hidden; font-size: 0.95rem; color: #4a4a4a; line-height: 1.5;">
+                {{post.preview_content}}
             </div>
-            <div class="post-actions" style="margin-top: 12px; padding-left: 0;">
-                <div class="action-btn">
-                    <i class="far fa-heart"></i>
-                    <span>{{ post.total_likes }}</span>
-                </div>
+        </div>
+
+        <div class="post-actions">
+            <div class="action-btn">
+                <i class="far fa-heart"></i>
+                <span>{{post.total_likes}}</span>
+            </div>
+            <div class="action-btn">
+                <i class="far fa-comment"></i>
+                <span>{{post.comment_count}}</span>
             </div>
         </div>
     </article>
     {% empty %}
     <div
-        style="background: white; padding: 60px; text-align: center; border-radius: 4px; border: 1px solid var(--border);">
-        <i class="fas fa-search fa-3x" style="margin-bottom: 16px; opacity: 0.1;"></i>
-        <h3 style="font-size: 1.1rem; margin-bottom: 8px;">No results found</h3>
-        <p style="font-size: 0.9rem; color: var(--text-meta);">Try adjusting your search or filters.</p>
+        style="background: white; padding: 80px 40px; text-align: center; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-soft);">
+        <div
+            style="width: 80px; height: 80px; background: hsl(210, 15%, 96%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+            <i class="fas fa-search fa-2x" style="color: var(--text-meta);"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">No results found</h3>
+        <p style="font-size: 1rem; color: var(--text-meta); max-width: 300px; margin: 0 auto;">Try adjusting your search
+            query or filters to find what you're looking for.</p>
     </div>
     {% endfor %}
 </section>
 
 {% if page_obj.has_other_pages %}
-<div class="pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 24px;">
+<div class="pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
     {% if page_obj.has_previous %}
-    <a href="?q={{ query }}&type={{ search_type }}&page={{ page_obj.previous_page_number }}" class="btn-orange"
-        style="background: #f6f7f8; color: var(--text-main); font-size: 0.85rem;">Previous</a>
+    <a href="?q={{search_query}}&type={{search_type}}&page={{page_obj.previous_page_number}}" class="btn-orange"
+        style="background: white; color: var(--text-main); border: 1px solid var(--border); box-shadow: none;">Previous</a>
     {% endif %}
     <span
-        style="padding: 8px 16px; background: white; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">Page
-        {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        style="padding: 10px 20px; background: white; border: 1px solid var(--border); border-radius: 12px; font-size: 0.9rem; font-weight: 600;">{{page_obj.number}}
+        / {{page_obj.paginator.num_pages}}</span>
     {% if page_obj.has_next %}
-    <a href="?q={{ query }}&type={{ search_type }}&page={{ page_obj.next_page_number }}" class="btn-orange"
-        style="background: #f6f7f8; color: var(--text-main); font-size: 0.85rem;">Next</a>
+    <a href="?q={{search_query}}&type={{search_type}}&page={{page_obj.next_page_number}}" class="btn-orange"
+        style="background: white; color: var(--text-main); border: 1px solid var(--border); box-shadow: none;">Next</a>
     {% endif %}
 </div>
 {% endif %}
+
+<style>
+    .filter-chip {
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        background: white;
+        color: var(--text-meta);
+        border: 1px solid var(--border);
+        white-space: nowrap;
+        transition: var(--transition);
+        display: inline-block;
+    }
+
+    .filter-chip:hover {
+        background: #f6f7f8 !important;
+        border-color: var(--border-hover) !important;
+    }
+
+    .filter-chip.active {
+        background: var(--primary) !important;
+        color: white !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 4px 12px hsla(16, 100%, 50%, 0.2) !important;
+    }
+</style>
 {% endblock %}

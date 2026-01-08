@@ -7,28 +7,44 @@
     .profile-card {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 32px;
+        border-radius: 20px;
+        padding: 40px 32px;
         text-align: center;
         margin-bottom: 24px;
         box-shadow: var(--shadow-soft);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        opacity: 0.1;
+        z-index: 0;
     }
 
     .profile-avatar {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: white;
-        margin: 0 auto 16px;
+        margin: 0 auto 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: 800;
         overflow: hidden;
         border: 4px solid white;
-        box-shadow: var(--shadow-soft);
+        box-shadow: var(--shadow-premium);
+        position: relative;
+        z-index: 1;
     }
 
     .profile-avatar img {
@@ -39,35 +55,75 @@
 
     .profile-name {
         font-family: 'Outfit', sans-serif;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         font-weight: 800;
         color: var(--text-main);
         margin-bottom: 4px;
+        letter-spacing: -0.5px;
     }
 
     .profile-username {
         color: var(--text-meta);
-        font-size: 0.95rem;
-        margin-bottom: 16px;
-        font-weight: 500;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        font-weight: 600;
     }
 
     .profile-bio {
-        font-size: 1rem;
+        font-size: 1.05rem;
         margin: 0 auto 24px;
         line-height: 1.6;
         color: var(--text-main);
-        max-width: 500px;
+        max-width: 550px;
+    }
+
+    .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .social-link {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: hsl(210, 15%, 96%);
+        color: var(--text-meta);
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .social-link:hover {
+        transform: translateY(-4px);
+        background: white;
+        box-shadow: var(--shadow-soft);
+        color: var(--primary);
+    }
+
+    .social-link.twitter:hover {
+        color: #1DA1F2;
+    }
+
+    .social-link.instagram:hover {
+        color: #E4405F;
+    }
+
+    .social-link.linkedin:hover {
+        color: #0A66C2;
     }
 
     .profile-stats {
         display: flex;
         justify-content: center;
-        gap: 40px;
+        gap: 32px;
+        padding: 24px 0;
         border-top: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-        padding: 20px 0;
-        margin-bottom: 24px;
+        margin-top: 8px;
     }
 
     .stat-item {
@@ -79,35 +135,36 @@
     .stat-val {
         font-family: 'Outfit', sans-serif;
         font-weight: 800;
-        font-size: 1.25rem;
+        font-size: 1.4rem;
         color: var(--text-main);
     }
 
     .stat-lab {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: var(--text-meta);
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
         font-weight: 700;
         margin-top: 4px;
     }
 
     .section-title {
         font-family: 'Outfit', sans-serif;
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 800;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
         color: var(--text-main);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        letter-spacing: -0.3px;
     }
 
     .edit-form-card {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 24px;
+        border-radius: 20px;
+        padding: 32px;
         margin-bottom: 32px;
         box-shadow: var(--shadow-soft);
     }
@@ -115,24 +172,24 @@
     .form-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 20px;
     }
 
-    @media (min-width: 600px) {
+    @media (min-width: 768px) {
         .form-grid {
             grid-template-columns: 1fr 1fr;
         }
     }
 
     .form-group {
-        margin-bottom: 16px;
+        margin-bottom: 20px;
     }
 
     .form-group label {
         display: block;
         font-size: 0.85rem;
         font-weight: 700;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         color: var(--text-main);
     }
 
@@ -140,13 +197,14 @@
     .form-group textarea,
     .form-group select {
         width: 100%;
-        padding: 12px;
+        padding: 12px 16px;
         border: 1.5px solid var(--border);
-        border-radius: 10px;
-        font-size: 0.95rem;
+        border-radius: 12px;
+        font-size: 1rem;
         background: hsl(210, 15%, 98%);
         transition: var(--transition);
         outline: none;
+        font-family: inherit;
     }
 
     .form-group input:focus,
@@ -154,6 +212,12 @@
         border-color: var(--primary);
         background: white;
         box-shadow: 0 0 0 4px hsla(16, 100%, 50%, 0.1);
+    }
+
+    .btn-orange.following {
+        background: #f0f0f0 !important;
+        color: #1c1c1c !important;
+        box-shadow: none !important;
     }
 </style>
 {% endblock %}
@@ -168,12 +232,33 @@
             {{ profile_user.username|first|upper }}
             {% endif %}
         </div>
-        <h2 class="profile-name">{{ profile_user.first_name }} {{ profile_user.last_name }}</h2>
+        <h2 class="profile-name">{{ profile_user.first_name|default:profile_user.username }}</h2>
         <p class="profile-username">u/{{ profile_user.username }}</p>
 
         {% if profile_user.profile.bio %}
         <p class="profile-bio">{{ profile_user.profile.bio }}</p>
         {% endif %}
+
+        <div class="social-links">
+            {% if profile_user.profile.twitter_link %}
+            <a href="{{ profile_user.profile.twitter_link }}" target="_blank" class="social-link twitter"
+                title="Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
+            {% endif %}
+            {% if profile_user.profile.instagram_link %}
+            <a href="{{ profile_user.profile.instagram_link }}" target="_blank" class="social-link instagram"
+                title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            {% endif %}
+            {% if profile_user.profile.linkedin_link %}
+            <a href="{{ profile_user.profile.linkedin_link }}" target="_blank" class="social-link linkedin"
+                title="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            {% endif %}
+        </div>
 
         <div class="profile-stats">
             <div class="stat-item">
@@ -191,15 +276,16 @@
         </div>
 
         {% if user.is_authenticated and user != profile_user %}
-        <form action="{% url 'follow_user' profile_user.username %}" method="POST" id="follow-form">
+        <form action="{% url 'follow_user' profile_user.username %}" method="POST" id="follow-form"
+            style="margin-top: 24px;">
             {% csrf_token %}
-            <button type="submit" id="follow-btn" class="btn-orange"
-                style="width: 100%; max-width: 200px; {% if is_following %}background: #f0f0f0; color: #1c1c1c; box-shadow: none;{% endif %}">
+            <button type="submit" id="follow-btn" class="btn-orange {% if is_following %}following{% endif %}"
+                style="width: 100%; max-width: 240px;">
                 {% if is_following %}Following{% else %}Follow{% endif %}
             </button>
         </form>
         {% elif user == profile_user %}
-        <div style="display: flex; gap: 12px; justify-content: center;">
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
             <a href="{% url 'logout' %}" class="btn-orange"
                 style="background: #f0f0f0; color: #1c1c1c; box-shadow: none;">Log Out</a>
             <button onclick="document.getElementById('edit-container').scrollIntoView({behavior:'smooth'})"
@@ -210,7 +296,7 @@
 
     {% if user == profile_user %}
     <div class="edit-form-card" id="edit-container">
-        <h3 class="section-title"><i class="fas fa-cog"></i> Profile Settings</h3>
+        <h3 class="section-title"><i class="fas fa-cog" style="color: var(--primary);"></i> Profile Settings</h3>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-grid">
@@ -229,22 +315,25 @@
             </div>
             <div class="form-group">
                 <label>Avatar</label>
-                {{ p_form.avatar }}
+                <div style="font-size: 0.9rem; color: var(--text-meta);">{{ p_form.avatar }}</div>
             </div>
             <div class="form-grid">
-                <div class="form-group"><label>Twitter</label>{{ p_form.twitter_link }}</div>
-                <div class="form-group"><label>Instagram</label>{{ p_form.instagram_link }}</div>
-                <div class="form-group"><label>LinkedIn</label>{{ p_form.linkedin_link }}</div>
+                <div class="form-group"><label>Twitter URL</label>{{ p_form.twitter_link }}</div>
+                <div class="form-group"><label>Instagram URL</label>{{ p_form.instagram_link }}</div>
+                <div class="form-group"><label>LinkedIn URL</label>{{ p_form.linkedin_link }}</div>
             </div>
-            <button type="submit" class="btn-orange" style="width: 100%; margin-top: 8px;">Update Profile</button>
+            <button type="submit" class="btn-orange"
+                style="width: 100%; height: 48px; margin-top: 12px; font-size: 1rem;">Update Profile
+                Information</button>
         </form>
     </div>
     {% endif %}
 
-    <h3 class="section-title"><i class="fas fa-pen-nib"></i> Recent Posts</h3>
+    <h3 class="section-title"><i class="fas fa-pen-nib" style="color: var(--primary);"></i> Recent Posts</h3>
     <div class="posts-feed">
         {% for post in user_posts %}
-        <article class="post-card" onclick="window.location.href='{% url 'post_detail' post.pk %}'">
+        <article class="post-card" onclick="window.location.href=this.dataset.url;"
+            data-url="{% url 'post_detail' post.pk %}">
             <div class="post-main">
                 <h2 class="post-title">{{ post.title }}</h2>
                 <div class="post-meta" style="margin-bottom: 0;">
@@ -258,9 +347,12 @@
         </article>
         {% empty %}
         <div
-            style="text-align: center; padding: 60px; background: white; border-radius: 16px; border: 1px solid var(--border);">
-            <i class="fas fa-ghost fa-3x" style="margin-bottom: 16px; opacity: 0.1;"></i>
-            <p style="color: var(--text-meta); font-weight: 500;">No posts shared yet.</p>
+            style="text-align: center; padding: 60px; background: white; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-soft);">
+            <div
+                style="width: 64px; height: 64px; background: hsl(210, 15%, 96%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i class="fas fa-feather fa-2x" style="color: var(--text-meta);"></i>
+            </div>
+            <p style="color: var(--text-meta); font-weight: 600;">No posts shared yet.</p>
         </div>
         {% endfor %}
     </div>
@@ -270,24 +362,24 @@
 {% block sidebar %}
 <div class="sidebar-widget">
     <div class="widget-title">About {{ profile_user.username }}</div>
-    <div style="padding: 16px;">
+    <div style="padding: 20px;">
         <div style="font-size: 0.95rem; line-height: 1.6;">
-            <p style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <p style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
                 <i class="far fa-calendar-alt" style="color: var(--primary);"></i>
                 <span>Member since {{ profile_user.date_joined|date:"M Y" }}</span>
             </p>
-            <div style="display: flex; gap: 12px; margin-top: 16px;">
+            <div class="social-links" style="justify-content: flex-start; margin-bottom: 0; margin-top: 20px;">
                 {% if profile_user.profile.twitter_link %}
-                <a href="{{ profile_user.profile.twitter_link }}" target="_blank"
-                    style="color: #1DA1F2; font-size: 1.2rem;"><i class="fab fa-twitter"></i></a>
+                <a href="{{ profile_user.profile.twitter_link }}" target="_blank" class="social-link twitter"
+                    style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="fab fa-twitter"></i></a>
                 {% endif %}
                 {% if profile_user.profile.instagram_link %}
-                <a href="{{ profile_user.profile.instagram_link }}" target="_blank"
-                    style="color: #E4405F; font-size: 1.2rem;"><i class="fab fa-instagram"></i></a>
+                <a href="{{ profile_user.profile.instagram_link }}" target="_blank" class="social-link instagram"
+                    style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="fab fa-instagram"></i></a>
                 {% endif %}
                 {% if profile_user.profile.linkedin_link %}
-                <a href="{{ profile_user.profile.linkedin_link }}" target="_blank"
-                    style="color: #0A66C2; font-size: 1.2rem;"><i class="fab fa-linkedin"></i></a>
+                <a href="{{ profile_user.profile.linkedin_link }}" target="_blank" class="social-link linkedin"
+                    style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="fab fa-linkedin"></i></a>
                 {% endif %}
             </div>
         </div>
@@ -327,6 +419,13 @@
                     });
             });
         }
+
+        // Add form-control class to Django form fields
+        document.querySelectorAll('.edit-form-card input, .edit-form-card textarea').forEach(el => {
+            if (el.type !== 'file' && el.type !== 'checkbox') {
+                el.classList.add('form-control');
+            }
+        });
     });
 </script>
 {% endblock %}

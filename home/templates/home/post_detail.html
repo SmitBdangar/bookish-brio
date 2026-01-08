@@ -144,8 +144,8 @@
         {% for comment in post.comments.all %}
         <div class="comment-item">
             <div class="post-meta" style="margin-bottom: 4px;">
-                <a href="{% url 'public_profile' comment.user.username %}" class="post-author"
-                    style="font-size: 0.8rem;">u/{{ comment.user.username }}</a>
+                <a href="{% url 'public_profile' comment.author.username %}" class="post-author"
+                    style="font-size: 0.8rem;">u/{{ comment.author.username }}</a>
                 <span>•</span>
                 <span style="font-size: 0.8rem;">{{ comment.created_at|timesince }} ago</span>
             </div>

@@ -438,6 +438,6 @@ def search_enhanced(request):
     
     return render(request, 'home/search_results.html', {
         'page_obj': page_obj,
-        'query': query,
+        'search_query': query,
         'search_type': search_type
     })
