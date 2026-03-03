@@ -30,7 +30,6 @@ class CommentModelTest(TestCase):
 
 class ViewTests(TestCase):
     def setUp(self):
-        self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='password')
         self.post = Post.objects.create(title='Test Post', content='Test Content', author=self.user)
 
@@ -40,7 +39,7 @@ class ViewTests(TestCase):
         self.assertContains(response, "Test Post")
 
     def test_post_detail_view(self):
-        response = self.client.get(reverse('post_detail', args=[self.post.pid] if hasattr(self.post, 'pid') else [self.post.id]))
+        response = self.client.get(reverse('post_detail', args=[self.post.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test Content")
 

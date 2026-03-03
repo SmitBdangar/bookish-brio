@@ -7,11 +7,11 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.db.models import Count, Q
 from django.utils.text import Truncator
 from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
 
 from .models import Post, Comment, PostImage, Follow, Bookmark, Notification
 from .forms import PostForm, CommentForm, SignUpForm, ProfileForm, UserUpdateForm
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login
 
 
 def index(request):
@@ -24,9 +24,9 @@ def index(request):
         post_list = Post.objects.filter(
             Q(title__icontains=query) | 
             Q(content__icontains=query)
-        ).annotate(comment_count=Count('comments')).order_by('-created_at')
+        ).select_related('author').prefetch_related('likes', 'tags').annotate(comment_count=Count('comments')).order_by('-created_at')
     else:
-        post_list = Post.objects.annotate(comment_count=Count('comments')).order_by('-created_at')
+        post_list = Post.objects.select_related('author').prefetch_related('likes', 'tags').annotate(comment_count=Count('comments')).order_by('-created_at')
 
     # Add bookmark status for authenticated users
     if request.user.is_authenticated:
@@ -111,9 +111,10 @@ def signup_view(request):
     return render(request, 'home/signup.html', {'form': form})
 
 
+@require_POST
 def logout_view(request):
     """
-    Logout the user and redirect to home.
+    Logout the user and redirect to home. POST-only to prevent CSRF-unsafe GET logout.
     """
     logout(request)
     messages.success(request, 'Successfully logged out!')
@@ -202,16 +203,28 @@ def post_detail(request, pk):
     Allows adding a comment.
     """
     post = get_object_or_404(Post, pk=pk)
-    comments = post.comments.all()
-    images = post.images.all() 
+    comments = post.comments.select_related('author').all()
+    images = post.images.all()
 
     if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, 'You must be logged in to comment.')
+            return redirect('login')
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             comment = comment_form.save(commit=False)
             comment.post = post
             comment.author = request.user
             comment.save()
+            # Create notification for post author
+            if post.author != request.user:
+                Notification.objects.create(
+                    recipient=post.author,
+                    sender=request.user,
+                    notification_type='comment',
+                    post=post,
+                    comment=comment
+                )
             messages.success(request, 'Comment added successfully!')
             return redirect('post_detail', pk=post.pk)
     else:
@@ -406,36 +419,33 @@ def trending_posts(request):
 def search_enhanced(request):
     """
     Enhanced search with filters for tags, authors, and content.
+    Uses QuerySet union + distinct() for correct deduplication (avoids list(set(...)) TypeError).
     """
     query = request.GET.get('q', '')
     search_type = request.GET.get('type', 'all')  # all, tags, authors, posts
-    
-    results = []
-    
+
+    post_qs = Post.objects.none()
+
     if query:
-        if search_type == 'all' or search_type == 'posts':
-            posts = Post.objects.filter(
+        if search_type in ('all', 'posts'):
+            post_qs = post_qs | Post.objects.filter(
                 Q(title__icontains=query) | Q(content__icontains=query)
             ).select_related('author')
-            results.extend(posts)
-        
-        if search_type == 'all' or search_type == 'tags':
+
+        if search_type in ('all', 'tags'):
             from .models import Tag
-            tags = Tag.objects.filter(name__icontains=query)
-            for tag in tags:
-                results.extend(tag.posts.all())
-        
-        if search_type == 'all' or search_type == 'authors':
-            authors = User.objects.filter(username__icontains=query)
-            for author in authors:
-                results.extend(author.posts.all())
-    
-    # Remove duplicates and paginate
-    unique_posts = list(set(results))
-    paginator = Paginator(unique_posts, 20)
+            tag_post_ids = Tag.objects.filter(name__icontains=query).values_list('posts__id', flat=True)
+            post_qs = post_qs | Post.objects.filter(id__in=tag_post_ids).select_related('author')
+
+        if search_type in ('all', 'authors'):
+            author_post_ids = User.objects.filter(username__icontains=query).values_list('posts__id', flat=True)
+            post_qs = post_qs | Post.objects.filter(id__in=author_post_ids).select_related('author')
+
+    post_qs = post_qs.distinct().order_by('-created_at')
+    paginator = Paginator(post_qs, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     return render(request, 'home/search_results.html', {
         'page_obj': page_obj,
         'search_query': query,

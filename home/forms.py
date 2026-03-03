@@ -8,12 +8,13 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'password1', 'password2')
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'tags_input']
+        # tags_input is a custom form field (not a model field), so it must NOT be in fields
+        fields = ['title', 'content', 'image']
         exclude = ['tags']
         widgets = {
             'title': forms.TextInput(attrs={
