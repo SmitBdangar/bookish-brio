@@ -274,79 +274,144 @@
 {% block extra_js %}
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const quill = new Quill('#editor-container', {
-            theme: 'snow',
-            placeholder: 'Share your story with the community…',
-            modules: {
-                toolbar: [
-                    [{ header: [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ list: 'ordered' }, { list: 'bullet' }],
-                    ['blockquote', 'code-block'],
-                    ['link'],
-                    ['clean']
-                ]
-            }
-        });
+document.addEventListener('DOMContentLoaded', function () {
 
-        const contentInput = document.querySelector('textarea[name="content"]');
-        if (contentInput && contentInput.value) quill.root.innerHTML = contentInput.value;
-
-        const titleInput = document.querySelector('input[name="title"]');
-        if (titleInput) titleInput.placeholder = 'Give your post a compelling title…';
-        const tagsInput = document.querySelector('input[name="tags_input"]');
-        if (tagsInput) tagsInput.placeholder = 'poetry, short-story, review, sci-fi…';
-
-        const dropArea = document.getElementById('dropArea');
-        const imageInput = document.getElementById('imageInput');
-        const previewGrid = document.getElementById('previewGrid');
-        let filesList = [];
-
-        dropArea.addEventListener('click', () => imageInput.click());
-        dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('drag-over'); });
-        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
-        dropArea.addEventListener('drop', e => {
-            e.preventDefault(); dropArea.classList.remove('drag-over');
-            filesList = [...filesList, ...Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))];
-            syncInput(); updatePreview();
-        });
-        imageInput.addEventListener('change', function () {
-            filesList = Array.from(this.files);
-            updatePreview();
-        });
-
-        function syncInput() {
-            const dt = new DataTransfer();
-            filesList.forEach(f => dt.items.add(f));
-            imageInput.files = dt.files;
+    // Initialize Quill
+    const quill = new Quill('#editor-container', {
+        theme: 'snow',
+        placeholder: 'Share your story with the community…',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link'],
+                ['clean']
+            ]
         }
-        function updatePreview() {
-            previewGrid.innerHTML = '';
-            filesList.forEach((file, idx) => {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `<img src="${e.target.result}" alt="preview"><div class="remove-img" data-idx="${idx}">×</div>`;
-                    previewGrid.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-        previewGrid.addEventListener('click', e => {
-            if (e.target.classList.contains('remove-img')) {
-                filesList.splice(+e.target.dataset.idx, 1);
-                syncInput(); updatePreview();
-            }
-        });
-
-        document.getElementById('postForm').addEventListener('submit', function () {
-            contentInput.value = quill.root.innerHTML;
-            const btn = document.getElementById('submitPostBtn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
-            btn.disabled = true;
-        });
     });
-</script>
-{% endblock %}
+
+    const contentInput = document.getElementById('id_content');
+
+    if (contentInput && contentInput.value) {
+        quill.root.innerHTML = contentInput.value;
+    }
+
+    quill.on('text-change', function () {
+        if (contentInput) {
+            contentInput.value = quill.root.innerHTML;
+        }
+    });
+
+    const titleInput = document.querySelector('input[name="title"]');
+    if (titleInput) titleInput.placeholder = 'Give your post a compelling title…';
+
+    const tagsInput = document.querySelector('input[name="tags_input"]');
+    if (tagsInput) tagsInput.placeholder = 'poetry, short-story, review, sci-fi…';
+
+    const dropArea = document.getElementById('dropArea');
+    const imageInput = document.getElementById('imageInput');
+    const previewGrid = document.getElementById('previewGrid');
+
+    let filesList = [];
+
+    dropArea.addEventListener('click', () => imageInput.click());
+
+    dropArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropArea.classList.add('drag-over');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('drag-over');
+    });
+
+    dropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        dropArea.classList.remove('drag-over');
+
+        const newFiles = Array.from(e.dataTransfer.files)
+            .filter(f => f.type.startsWith('image/'));
+
+        filesList = [...filesList, ...newFiles];
+        filesList = validateFiles(filesList);
+
+        syncInput();
+        updatePreview();
+    });
+
+    imageInput.addEventListener('change', function () {
+        const newFiles = Array.from(this.files);
+        filesList = [...filesList, ...newFiles];
+        filesList = validateFiles(filesList);
+
+        syncInput();
+        updatePreview();
+    });
+
+    function validateFiles(files) {
+        const MAX_SIZE = 10 * 1024 * 1024;
+
+        return files.filter(file => {
+            if (file.size > MAX_SIZE) {
+                alert(`${file.name} exceeds 10MB limit`);
+                return false;
+            }
+            return true;
+        });
+    }
+
+    function syncInput() {
+        const dt = new DataTransfer();
+        filesList.forEach(f => dt.items.add(f));
+        imageInput.files = dt.files;
+    }
+
+    function updatePreview() {
+        previewGrid.innerHTML = '';
+
+        filesList.forEach((file, idx) => {
+            const reader = new FileReader();
+
+            reader.onload = e => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="preview">
+                    <div class="remove-img" data-idx="${idx}">×</div>
+                `;
+
+                previewGrid.appendChild(div);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    previewGrid.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-img')) {
+            const index = parseInt(e.target.dataset.idx);
+            filesList.splice(index, 1);
+
+            syncInput();
+            updatePreview();
+        }
+    });
+
+    // FIX 5: safe submit handler (no crash)
+    document.getElementById('postForm').addEventListener('submit', function () {
+
+        if (contentInput) {
+            contentInput.value = quill.root.innerHTML;
+        }
+
+        const btn = document.getElementById('submitPostBtn');
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
+        btn.disabled = true;
+    });
+
+});
+</script>{% endblock %}
