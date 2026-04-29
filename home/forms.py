@@ -3,46 +3,34 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Post, Comment, Profile
 
-class SignUpForm(UserCreationForm):
-    email = forms.EmailField(required=True, help_text='Required. Inform a valid email address.')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'password1' in self.fields:
-            self.fields['password1'].help_text = "Your password must contain at least 10 characters and cannot be a commonly used password."
+class SignUpForm(UserCreationForm):
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
 
-class PostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['title', 'content', 'image']
-        exclude = ['tags']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'placeholder': 'Enter your post title...',
-                'style': (
-                    'width:100%; padding:12px; border:1px solid #3b2f2f; '
-                    'border-radius:6px; font-family:Georgia, serif; margin-bottom:15px; background-color:#fdfaf3;'
-                )
-            }),
-            'content': forms.Textarea(attrs={
-                'placeholder': "What's on your mind?",
-                'rows': 6,
-                'style': 'width:100%; padding:12px; border:1px solid #3b2f2f; border-radius:6px; font-family:Roboto, sans-serif; resize:vertical; margin-bottom:15px; background-color:#fdfaf3;'
-            }),
-        }
 
+class PostForm(forms.ModelForm):
     tags_input = forms.CharField(
         max_length=200,
         required=False,
         widget=forms.TextInput(attrs={
             'placeholder': 'Tags (comma separated)...',
-            'style': 'width:100%; padding:12px; border:1px solid #3b2f2f; border-radius:6px; margin-bottom:15px; background-color:#fdfaf3;'
+            'class': 'form-control'
         })
     )
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'image']
+
+    def clean_content(self):
+        content = self.cleaned_data.get('content', '').strip()
+        if not content or content == '<p><br></p>':
+            raise forms.ValidationError("Content cannot be empty.")
+        return content
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -58,31 +46,23 @@ class PostForm(forms.ModelForm):
         if tags_str:
             tag_names = [t.strip() for t in tags_str.split(',') if t.strip()]
             for name in tag_names:
-                tag, created = Tag.objects.get_or_create(name=name)
+                tag, _ = Tag.objects.get_or_create(name=name)
                 instance.tags.add(tag)
+
 
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']
-        widgets = {
-            'content': forms.Textarea(attrs={
-                'rows': 4,
-                'placeholder': 'Write your comment here...'
-            })
-        }
+
 
 class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField(required=True)
-
     class Meta:
         model = User
         fields = ['username', 'email']
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['bio', 'avatar', 'instagram_link', 'twitter_link', 'linkedin_link']
-        widgets = {
-            'bio': forms.Textarea(attrs={'rows': 3}),
-        }

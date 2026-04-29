@@ -388,7 +388,9 @@
                 });
             });
         }
-        document.querySelectorAll('.edit-card input, .edit-card textarea').forEach(el => {
+
+        // FIX: also apply form-control to select elements, not just inputs and textareas
+        document.querySelectorAll('.edit-card input, .edit-card textarea, .edit-card select').forEach(el => {
             if (el.type !== 'file' && el.type !== 'checkbox') el.classList.add('form-control');
         });
     });

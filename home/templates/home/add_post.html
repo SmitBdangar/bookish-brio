@@ -157,10 +157,7 @@
         background: #e53e3e;
     }
 
-    .tags-field {
-        position: relative;
-    }
-
+    /* position:relative is now in main.css for .tags-field */
     .tags-field input {
         padding-left: 34px;
     }
@@ -226,7 +223,8 @@
                     <i class="fas fa-cloud-upload-alt"></i>
                     <p>Drag & drop or click to upload</p>
                     <small>PNG, JPG, WebP · up to 10MB</small>
-                    <input type="file" name="images" id="imageInput" multiple accept="image/*" style="display:none;">
+                    {# FIX: name must be "image" (singular) to match the model field #}
+                    <input type="file" name="image" id="imageInput" accept="image/*" style="display:none;">
                 </div>
                 <div class="preview-grid" id="previewGrid"></div>
             </div>
@@ -314,7 +312,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const imageInput = document.getElementById('imageInput');
     const previewGrid = document.getElementById('previewGrid');
 
-    let filesList = [];
+    // FIX: single image only (model has one ImageField), so filesList holds at most one file
+    let selectedFile = null;
 
     dropArea.addEventListener('click', () => imageInput.click());
 
@@ -331,84 +330,72 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         dropArea.classList.remove('drag-over');
 
-        const newFiles = Array.from(e.dataTransfer.files)
-            .filter(f => f.type.startsWith('image/'));
-
-        filesList = [...filesList, ...newFiles];
-        filesList = validateFiles(filesList);
-
-        syncInput();
-        updatePreview();
-    });
-
-    imageInput.addEventListener('change', function () {
-        const newFiles = Array.from(this.files);
-        filesList = [...filesList, ...newFiles];
-        filesList = validateFiles(filesList);
-
-        syncInput();
-        updatePreview();
-    });
-
-    function validateFiles(files) {
-        const MAX_SIZE = 10 * 1024 * 1024;
-
-        return files.filter(file => {
-            if (file.size > MAX_SIZE) {
-                alert(`${file.name} exceeds 10MB limit`);
-                return false;
-            }
-            return true;
-        });
-    }
-
-    function syncInput() {
-        const dt = new DataTransfer();
-        filesList.forEach(f => dt.items.add(f));
-        imageInput.files = dt.files;
-    }
-
-    function updatePreview() {
-        previewGrid.innerHTML = '';
-
-        filesList.forEach((file, idx) => {
-            const reader = new FileReader();
-
-            reader.onload = e => {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="preview">
-                    <div class="remove-img" data-idx="${idx}">×</div>
-                `;
-
-                previewGrid.appendChild(div);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    previewGrid.addEventListener('click', e => {
-        if (e.target.classList.contains('remove-img')) {
-            const index = parseInt(e.target.dataset.idx);
-            filesList.splice(index, 1);
-
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        if (files.length > 0) {
+            selectedFile = files[0];
             syncInput();
             updatePreview();
         }
     });
 
-    // FIX 5: safe submit handler (no crash)
-    document.getElementById('postForm').addEventListener('submit', function () {
+    imageInput.addEventListener('change', function () {
+        if (this.files && this.files.length > 0) {
+            selectedFile = this.files[0];
+            updatePreview();
+        }
+    });
 
+    function validateFile(file) {
+        const MAX_SIZE = 10 * 1024 * 1024;
+        if (file.size > MAX_SIZE) {
+            alert(`${file.name} exceeds 10MB limit`);
+            return false;
+        }
+        return true;
+    }
+
+    function syncInput() {
+        if (!selectedFile) return;
+        if (!validateFile(selectedFile)) {
+            selectedFile = null;
+            return;
+        }
+        const dt = new DataTransfer();
+        dt.items.add(selectedFile);
+        imageInput.files = dt.files;
+    }
+
+    function updatePreview() {
+        previewGrid.innerHTML = '';
+        if (!selectedFile) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="preview">
+                <div class="remove-img">×</div>
+            `;
+            previewGrid.appendChild(div);
+        };
+        reader.readAsDataURL(selectedFile);
+    }
+
+    previewGrid.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-img')) {
+            selectedFile = null;
+            imageInput.value = '';
+            updatePreview();
+        }
+    });
+
+    document.getElementById('postForm').addEventListener('submit', function () {
         if (contentInput) {
             contentInput.value = quill.root.innerHTML;
         }
 
         const btn = document.getElementById('submitPostBtn');
-
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
         btn.disabled = true;
     });

@@ -95,12 +95,13 @@
             </div>
         </div>
         <div class="post-actions">
+            {# FIX: was post.like_count — must use post.total_likes to match the model property used everywhere else #}
             <span class="action-btn" style="cursor:default;">
                 <i class="fas fa-fire" style="color:var(--primary);"></i>
-                <span>{{ post.like_count|add:post.comment_count }} engagements</span>
+                <span>{{ post.total_likes|add:post.comment_count }} engagements</span>
             </span>
             <span class="action-btn" style="cursor:default;">
-                <i class="far fa-heart"></i> {{ post.like_count }}
+                <i class="far fa-heart"></i> {{ post.total_likes }}
             </span>
             <span class="action-btn" style="cursor:default;">
                 <i class="far fa-comment"></i> {{ post.comment_count }}

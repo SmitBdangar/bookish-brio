@@ -243,7 +243,7 @@
             </form>
             <span class="action-btn" style="cursor:default;">
                 <i class="far fa-comment"></i>
-                <span>{{ post.comment_count }}</span>
+                <span id="comment-count">{{ post.comment_count }}</span>
             </span>
             {% if user.is_authenticated %}
             <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form"
@@ -256,8 +256,9 @@
             </form>
             {% endif %}
             {% if user == post.author %}
+            {# FIX: removed invalid conditional margin-left. Delete is always the last action for the author. #}
             <a href="{% url 'delete_post' post.pk %}" class="action-btn"
-                style="margin-left:{% if not user.is_authenticated %}auto{% endif %};"
+                style="margin-left:auto;"
                 onclick="return confirm('Delete this post?');">
                 <i class="far fa-trash-alt" style="color:#e53e3e;"></i>
             </a>
@@ -269,15 +270,16 @@
 <section class="comment-section">
     <div class="comment-section-header">
         <i class="far fa-comments" style="color:var(--primary);"></i>
-        {{ post.comment_count }} Comment{{ post.comment_count|pluralize }}
+        <span id="comment-count-header">{{ post.comment_count }}</span>&nbsp;Comment{{ post.comment_count|pluralize }}
     </div>
 
     <div class="comment-form-wrap">
         {% if user.is_authenticated %}
-        <form method="post" class="comment-form">
+        {# FIX: comment form now submits via AJAX to match the rest of the page's interaction model #}
+        <form id="comment-form" method="post">
             {% csrf_token %}
-            <textarea name="content" class="comment-textarea" placeholder="Share your thoughts…" required></textarea>
-            <button type="submit" class="btn-orange">
+            <textarea name="content" id="comment-textarea" class="comment-textarea" placeholder="Share your thoughts…" required></textarea>
+            <button type="submit" class="btn-orange" id="comment-submit-btn">
                 <i class="fas fa-paper-plane"></i> Post Comment
             </button>
         </form>
@@ -292,7 +294,7 @@
         {% endif %}
     </div>
 
-    <div class="comments-list">
+    <div class="comments-list" id="comments-list">
         {% for comment in post.comments.all %}
         <div class="comment-item">
             <div class="comment-author-row">
@@ -311,7 +313,7 @@
             <div class="comment-body">{{ comment.content }}</div>
         </div>
         {% empty %}
-        <div style="padding:40px;text-align:center;color:var(--text-meta);font-size:0.9rem;">
+        <div id="no-comments-placeholder" style="padding:40px;text-align:center;color:var(--text-meta);font-size:0.9rem;">
             No comments yet. Be the first to respond!
         </div>
         {% endfor %}
@@ -377,6 +379,78 @@
             btn.classList.toggle('active', data.bookmarked);
             if (span) span.textContent = data.bookmarked ? 'Saved' : 'Save';
         });
+
+        // FIX: comment form AJAX — appends the new comment without a full page reload
+        const commentForm = document.getElementById('comment-form');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const textarea = document.getElementById('comment-textarea');
+                const submitBtn = document.getElementById('comment-submit-btn');
+                const content = textarea.value.trim();
+                if (!content) return;
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting…';
+
+                const formData = new FormData(this);
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': window.csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                }).then(r => {
+                    if (r.ok) {
+                        return r.json().catch(() => null);
+                    }
+                    throw new Error('Failed');
+                }).then(data => {
+                    // Remove empty-state placeholder if present
+                    const placeholder = document.getElementById('no-comments-placeholder');
+                    if (placeholder) placeholder.remove();
+
+                    // Build the new comment element
+                    const list = document.getElementById('comments-list');
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    div.style.animation = 'cardIn 0.3s var(--ease) both';
+
+                    const username = data && data.author ? data.author : '{{ user.username }}';
+                    const initial = username.charAt(0).toUpperCase();
+                    const timeStr = data && data.created_at ? data.created_at : 'just now';
+
+                    div.innerHTML = `
+                        <div class="comment-author-row">
+                            <div class="comment-avatar">${initial}</div>
+                            <div>
+                                <span style="font-weight:600;font-size:0.875rem;color:var(--text-main);">${username}</span>
+                                <div style="font-size:0.75rem;color:var(--text-meta);">${timeStr}</div>
+                            </div>
+                        </div>
+                        <div class="comment-body">${content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+                    `;
+                    list.appendChild(div);
+
+                    // Update comment counts
+                    const newCount = list.querySelectorAll('.comment-item').length;
+                    const countEl = document.getElementById('comment-count');
+                    const headerCountEl = document.getElementById('comment-count-header');
+                    if (countEl) countEl.textContent = newCount;
+                    if (headerCountEl) headerCountEl.textContent = newCount;
+
+                    textarea.value = '';
+                }).catch(() => {
+                    // On failure fall back to normal form submission
+                    commentForm.submit();
+                }).finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
+                });
+            });
+        }
     });
 </script>
 {% endblock %}

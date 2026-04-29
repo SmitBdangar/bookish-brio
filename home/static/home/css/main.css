@@ -766,7 +766,8 @@ body {
 
 .form-control:focus,
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   border-color: var(--primary);
   background: #fff;
   box-shadow: 0 0 0 4px var(--primary-glow);
@@ -921,6 +922,11 @@ body {
   font-size: 0.72rem;
   font-weight: 800;
   font-family: 'Outfit', sans-serif;
+}
+
+/* FIX: tags-field needs position:relative so the ::before # symbol positions correctly */
+.tags-field {
+  position: relative;
 }
 
 @media (max-width: 640px) {
