@@ -2,204 +2,1093 @@
 
 {% block title %}Bookish Brio — Share Your Stories{% endblock %}
 
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+
+/* ─── Typography Overrides ────────────────────────────────── */
+.feed-section {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ─── Feed Eyebrow ───────────────────────────────────────── */
+.feed-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.feed-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feed-heading-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: hsl(220, 35%, 8%);
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.15;
+}
+
+.feed-heading-title .title-accent {
+  display: block;
+  width: 4px;
+  height: 26px;
+  background: var(--primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.feed-heading-sub {
+  font-size: 0.83rem;
+  color: hsl(220, 12%, 55%);
+  padding-left: 16px;
+  font-weight: 400;
+}
+
+/* ─── Filter Chips ───────────────────────────────────────── */
+.filter-row {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+
+.chip {
+  padding: 7px 18px;
+  border-radius: 50px;
+  font-size: 0.79rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.22s ease;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.1px;
+  border: 1.5px solid transparent;
+}
+
+.chip-default {
+  background: white;
+  color: hsl(220, 12%, 48%);
+  border-color: hsl(220, 15%, 87%);
+}
+
+.chip-default:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: hsla(16, 95%, 52%, 0.05);
+}
+
+.chip-active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px hsla(16, 95%, 52%, 0.3);
+}
+
+.chip-active:hover {
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px hsla(16, 95%, 52%, 0.38);
+}
+
+/* ─── Hero Card ──────────────────────────────────────────── */
+.hero-card {
+  display: grid;
+  grid-template-columns: 52% 48%;
+  background: white;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid hsl(220, 16%, 88%);
+  margin-bottom: 22px;
+  cursor: pointer;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  min-height: 360px;
+  animation: revealUp 0.5s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+}
+
+.hero-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  transform: translateY(-4px);
+}
+
+.hero-img-wrap {
+  overflow: hidden;
+  background: hsl(220, 14%, 93%);
+  position: relative;
+}
+
+.hero-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s ease;
+}
+
+.hero-card:hover .hero-img-wrap img {
+  transform: scale(1.06);
+}
+
+.hero-no-img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, hsl(36, 30%, 91%) 0%, hsl(220, 18%, 88%) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-no-img::before {
+  content: '❝';
+  position: absolute;
+  font-family: 'Playfair Display', serif;
+  font-size: 11rem;
+  color: hsl(220, 16%, 78%);
+  opacity: 0.22;
+  top: 50%;
+  left: 50%;
+  transform: translate(-40%, -50%);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.hero-no-img i {
+  font-size: 2.5rem;
+  color: hsl(220, 14%, 65%);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-body {
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hero-top {
+  flex: 1;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hero-featured-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--primary);
+}
+
+.hero-featured-label::before {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1px;
+}
+
+.hero-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+
+.hero-tag-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: hsla(16, 95%, 52%, 0.1);
+  padding: 3px 10px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+
+.hero-tag-pill:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.72rem;
+  font-weight: 700;
+  line-height: 1.27;
+  color: hsl(220, 35%, 8%);
+  margin-bottom: 14px;
+  transition: color 0.22s;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-card:hover .hero-title {
+  color: var(--primary);
+}
+
+.hero-excerpt {
+  font-size: 0.875rem;
+  color: hsl(220, 12%, 48%);
+  line-height: 1.72;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.hero-bottom {
+  padding-top: 22px;
+  margin-top: 22px;
+  border-top: 1px solid hsl(220, 15%, 92%);
+}
+
+.hero-author-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  color: hsl(220, 12%, 52%);
+}
+
+.hero-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.68rem;
+  flex-shrink: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.hero-author-name {
+  font-weight: 600;
+  color: hsl(220, 25%, 14%);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.hero-author-name:hover { color: var(--primary); }
+
+.hero-dot { color: hsl(220, 14%, 76%); }
+
+.hero-action-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ─── Post Grid ──────────────────────────────────────────── */
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 580px) {
+  .posts-grid { grid-template-columns: 1fr; }
+}
+
+.grid-card {
+  background: white;
+  border: 1px solid hsl(220, 15%, 88%);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  animation: revealUp 0.45s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.grid-card:nth-child(1) { animation-delay: 0.12s; }
+.grid-card:nth-child(2) { animation-delay: 0.17s; }
+.grid-card:nth-child(3) { animation-delay: 0.22s; }
+.grid-card:nth-child(4) { animation-delay: 0.27s; }
+.grid-card:nth-child(5) { animation-delay: 0.32s; }
+.grid-card:nth-child(6) { animation-delay: 0.37s; }
+.grid-card:nth-child(7) { animation-delay: 0.42s; }
+.grid-card:nth-child(8) { animation-delay: 0.47s; }
+
+.grid-card:hover {
+  box-shadow: 0 10px 34px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+  transform: translateY(-4px);
+  border-color: hsl(220, 15%, 78%);
+}
+
+.grid-img-wrap {
+  width: 100%;
+  height: 170px;
+  overflow: hidden;
+  background: hsl(220, 14%, 93%);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.grid-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+
+.grid-card:hover .grid-img-wrap img { transform: scale(1.05); }
+
+.grid-card-body {
+  padding: 18px 18px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-author-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.76rem;
+  color: hsl(220, 12%, 54%);
+}
+
+.mini-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.58rem;
+  flex-shrink: 0;
+}
+
+.mini-author {
+  font-weight: 600;
+  color: hsl(220, 20%, 20%);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.mini-author:hover { color: var(--primary); }
+
+.mini-dot { color: hsl(220, 14%, 76%); }
+
+.grid-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 9px;
+}
+
+.grid-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: hsla(16, 95%, 52%, 0.1);
+  padding: 2px 8px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+
+.grid-tag:hover { background: var(--primary); color: white; }
+
+.grid-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.34;
+  color: hsl(220, 35%, 8%);
+  margin-bottom: 9px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.grid-card:hover .grid-title { color: var(--primary); }
+
+.grid-excerpt {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: hsl(220, 12%, 50%);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+  margin-bottom: 14px;
+}
+
+.grid-footer {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-top: 12px;
+  border-top: 1px solid hsl(220, 15%, 94%);
+}
+
+/* ─── Shared Action Button ───────────────────────────────── */
+.act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  color: hsl(220, 12%, 54%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.act-btn i { font-size: 0.92rem; }
+
+.act-btn:hover {
+  background: hsl(220, 18%, 95%);
+  color: hsl(220, 25%, 20%);
+}
+
+.act-btn.active { color: var(--primary); }
+.act-btn.like-active i { color: #e53e3e; }
+
+/* ─── Pagination ─────────────────────────────────────────── */
+.feed-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.page-pill {
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  border: 1.5px solid hsl(220, 15%, 87%);
+  background: white;
+  color: hsl(220, 15%, 38%);
+  text-decoration: none;
+  transition: all 0.22s;
+}
+
+.page-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: hsla(16, 95%, 52%, 0.05);
+}
+
+.page-info-pill {
+  padding: 8px 18px;
+  background: hsl(220, 18%, 96%);
+  border-radius: 50px;
+  font-size: 0.79rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  color: hsl(220, 12%, 54%);
+}
+
+/* ─── Empty State ────────────────────────────────────────── */
+.feed-empty {
+  background: white;
+  border: 1.5px dashed hsl(220, 16%, 85%);
+  border-radius: 22px;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.feed-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: hsl(36, 25%, 94%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 22px;
+  font-size: 1.8rem;
+  color: hsl(220, 14%, 64%);
+}
+
+.feed-empty h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: hsl(220, 25%, 12%);
+  margin-bottom: 8px;
+}
+
+.feed-empty p {
+  font-family: 'DM Sans', sans-serif;
+  color: hsl(220, 12%, 54%);
+  font-size: 0.9rem;
+  margin-bottom: 26px;
+}
+
+/* ─── Sidebar Redesign ───────────────────────────────────── */
+.sw-editorial {
+  background: white;
+  border: 1px solid hsl(220, 15%, 88%);
+  border-radius: 18px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+}
+
+.sw-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid hsl(220, 15%, 93%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: hsl(220, 25%, 30%);
+}
+
+.sw-head i { color: var(--primary); font-size: 0.85rem; }
+
+.sw-body { padding: 8px 0; }
+
+.trending-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid hsl(220, 15%, 96%);
+  text-decoration: none;
+  transition: background 0.18s;
+  gap: 10px;
+}
+
+.trending-row:last-child { border-bottom: none; }
+.trending-row:hover { background: hsl(220, 20%, 98%); }
+
+.trending-row-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trending-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  opacity: 0.45;
+  min-width: 18px;
+}
+
+.trending-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: hsl(220, 25%, 16%);
+  transition: color 0.2s;
+}
+
+.trending-row:hover .trending-label { color: var(--primary); }
+
+.trending-badge {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  color: hsl(220, 12%, 54%);
+  background: hsl(220, 18%, 95%);
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Fallback tag cloud */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 14px 20px;
+}
+
+.tag-cloud-pill {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: hsla(16, 95%, 52%, 0.1);
+  padding: 4px 12px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+
+.tag-cloud-pill:hover { background: var(--primary); color: white; }
+
+/* Join CTA */
+.join-cta {
+  background: linear-gradient(145deg, hsl(220, 25%, 10%) 0%, hsl(220, 30%, 16%) 100%);
+  border-radius: 18px;
+  padding: 28px 22px;
+  text-align: center;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.join-cta::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -30px;
+  width: 140px; height: 140px;
+  background: var(--primary);
+  opacity: 0.08;
+  border-radius: 50%;
+}
+
+.join-cta::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -20px;
+  width: 120px; height: 120px;
+  background: hsl(200, 80%, 50%);
+  opacity: 0.07;
+  border-radius: 50%;
+}
+
+.join-cta-icon {
+  font-size: 1.8rem;
+  margin-bottom: 14px;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.join-cta h3 {
+  font-family: 'Playfair Display', serif;
+  color: white;
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.join-cta p {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.82rem;
+  margin-bottom: 22px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+}
+
+.join-btn-primary {
+  display: block;
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 4px 14px hsla(16, 95%, 52%, 0.35);
+}
+
+.join-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px hsla(16, 95%, 52%, 0.45);
+}
+
+.join-btn-ghost {
+  display: block;
+  color: rgba(255,255,255,0.6);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: color 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.join-btn-ghost:hover { color: rgba(255,255,255,0.9); }
+
+/* ─── Animation ──────────────────────────────────────────── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .hero-card {
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+  .hero-img-wrap {
+    height: 220px;
+  }
+  .hero-body {
+    padding: 28px 24px;
+  }
+  .hero-title {
+    font-size: 1.4rem;
+  }
+  .hero-excerpt { -webkit-line-clamp: 2; }
+}
+
+</style>
+{% endblock %}
+
+
 {% block content %}
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-    <div>
-        <h2 style="font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-0.3px;">
-            {% if user.is_authenticated %}Your Feed{% else %}Explore Posts{% endif %}
-        </h2>
-        <p style="color:var(--text-meta);font-size:0.85rem;margin-top:2px;">
-            {% if user.is_authenticated %}Stories from the community{% else %}Join Bookish Brio to personalise your
-            feed{% endif %}
-        </p>
-    </div>
-    <div class="search-filters" style="margin-bottom:0;">
-        <a href="{% url 'index' %}" class="filter-chip {% if not request.GET.sort %}active{% endif %}">✨ Latest</a>
-        <a href="{% url 'trending' %}" class="filter-chip">🔥 Trending</a>
-        {% if user.is_authenticated %}
-        <a href="{% url 'bookmarks' %}" class="filter-chip">🔖 Saved</a>
-        {% endif %}
-    </div>
-</div>
+<div class="feed-section">
 
-<section class="posts-feed">
-    {% if page_obj %}
-    {% for post in page_obj %}
-    <article class="post-card" onclick="window.location.href=this.dataset.url;"
-        data-url="{% url 'post_detail' post.pk %}">
+  <!-- ── Eyebrow ─────────────────────────────── -->
+  <div class="feed-eyebrow">
+    <div class="feed-heading">
+      <h2 class="feed-heading-title">
+        <span class="title-accent"></span>
+        {% if user.is_authenticated %}Your Feed{% else %}Explore Stories{% endif %}
+      </h2>
+      <p class="feed-heading-sub">
+        {% if user.is_authenticated %}Stories from the community{% else %}Join to personalise your reading{% endif %}
+      </p>
+    </div>
 
+    <div class="filter-row">
+      <a href="{% url 'index' %}" class="chip {% if not request.GET.sort %}chip-active{% else %}chip-default{% endif %}">✦ Latest</a>
+      <a href="{% url 'trending' %}" class="chip chip-default">🔥 Trending</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'bookmarks' %}" class="chip chip-default">🔖 Saved</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Messages ────────────────────────────── -->
+  {% if messages %}
+  <div style="margin-bottom:18px;">
+    {% for message in messages %}
+    <div class="alert">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if page_obj %}
+
+    <!-- ── Hero: First Post ──────────────────── -->
+    {% with post=page_obj.0 %}
+    <article class="hero-card" onclick="window.location.href='{% url 'post_detail' post.pk %}';">
+
+      <div class="hero-img-wrap">
         {% if post.image %}
-        <div class="post-image-wrap" style="height:220px;">
-            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+        <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="eager">
+        {% else %}
+        <div class="hero-no-img">
+          <i class="fas fa-book-open"></i>
         </div>
         {% endif %}
+      </div>
 
-        <div class="post-main">
-            <div class="post-meta">
-                <div class="post-author-avatar">{{ post.author.username|first|upper }}</div>
-                <a href="{% url 'public_profile' post.author.username %}" class="post-author"
-                    onclick="event.stopPropagation();">
-                    {{ post.author.username }}
-                </a>
-                <span class="post-meta-dot">·</span>
-                <span>{{ post.created_at|timesince }} ago</span>
-                {% if post.reading_time %}
-                <span class="post-meta-dot">·</span>
-                <span><i class="far fa-clock" style="font-size:0.75rem;"></i> {{ post.reading_time }}</span>
-                {% endif %}
-            </div>
+      <div class="hero-body">
+        <div class="hero-top">
+          <div class="hero-eyebrow">
+            <span class="hero-featured-label">Featured Story</span>
+          </div>
 
-            <h2 class="post-title">{{ post.title }}</h2>
+          {% if post.tags.all %}
+          <div class="hero-tags-row">
+            {% for tag in post.tags.all|slice:":3" %}
+            <a href="?q={{ tag.name }}" class="hero-tag-pill" onclick="event.stopPropagation();">#{{ tag.name }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
 
-            {% if post.tags.all %}
-            <div class="post-tags">
-                {% for tag in post.tags.all|slice:":3" %}
-                <a href="?q={{ tag.name }}" class="post-tag" onclick="event.stopPropagation();">#{{ tag.name }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="post-content-preview">{{ post.preview_content }}</div>
+          <h2 class="hero-title">{{ post.title }}</h2>
+          <p class="hero-excerpt">{{ post.preview_content }}</p>
         </div>
 
-        <div class="post-actions">
-            <form action="{% url 'like_post' post.pk %}" method="POST" class="like-form"
-                onclick="event.stopPropagation();">
-                {% csrf_token %}
-                <button type="submit" class="action-btn {% if user in post.likes.all %}active like-active{% endif %}"
-                    title="Like">
-                    <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
-                    <span class="count">{{ post.total_likes }}</span>
-                </button>
+        <div class="hero-bottom">
+          <div class="hero-author-row">
+            <div class="hero-avatar">{{ post.author.username|first|upper }}</div>
+            <a href="{% url 'public_profile' post.author.username %}" class="hero-author-name" onclick="event.stopPropagation();">{{ post.author.username }}</a>
+            <span class="hero-dot">·</span>
+            <span>{{ post.created_at|timesince }} ago</span>
+            {% if post.reading_time %}
+            <span class="hero-dot">·</span>
+            <span><i class="far fa-clock" style="font-size:0.72rem;"></i> {{ post.reading_time }}</span>
+            {% endif %}
+          </div>
+
+          <div class="hero-action-row">
+            <form action="{% url 'like_post' post.pk %}" method="POST" class="like-form" onclick="event.stopPropagation();">
+              {% csrf_token %}
+              <button type="submit" class="act-btn {% if user in post.likes.all %}active like-active{% endif %}">
+                <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                <span class="count">{{ post.total_likes }}</span>
+              </button>
             </form>
 
-            <a href="{% url 'post_detail' post.pk %}" class="action-btn" onclick="event.stopPropagation();"
-                title="Comments">
-                <i class="far fa-comment"></i>
-                <span>{{ post.comment_count }}</span>
+            <a href="{% url 'post_detail' post.pk %}" class="act-btn" onclick="event.stopPropagation();">
+              <i class="far fa-comment"></i> {{ post.comment_count }}
             </a>
 
             {% if user.is_authenticated %}
-            <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form"
-                onclick="event.stopPropagation();" style="margin-left:auto;">
-                {% csrf_token %}
-                <button type="submit" class="action-btn {% if post.is_bookmarked %}active{% endif %}" title="Save">
-                    <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
-                </button>
+            <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form" onclick="event.stopPropagation();" style="margin-left:auto;">
+              {% csrf_token %}
+              <button type="submit" class="act-btn {% if post.is_bookmarked %}active{% endif %}">
+                <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
+              </button>
             </form>
             {% endif %}
+          </div>
         </div>
+      </div>
+
     </article>
-    {% endfor %}
+    {% endwith %}
 
-    {% else %}
-    <div class="empty-state">
-        <div class="empty-icon"><i class="fas fa-feather-alt"></i></div>
-        <h3>No posts yet</h3>
-        <p>Be the first to share a story with the community!</p>
-        <a href="{% url 'add_post' %}" class="btn-orange">Create Post</a>
+    <!-- ── Grid: Remaining Posts ─────────────── -->
+    {% if page_obj|length > 1 %}
+    <div class="posts-grid">
+      {% for post in page_obj %}
+      {% if not forloop.first %}
+
+      <article class="grid-card" onclick="window.location.href='{% url 'post_detail' post.pk %}';">
+
+        {% if post.image %}
+        <div class="grid-img-wrap">
+          <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+        </div>
+        {% endif %}
+
+        <div class="grid-card-body">
+
+          <div class="grid-author-row">
+            <div class="mini-avatar">{{ post.author.username|first|upper }}</div>
+            <a href="{% url 'public_profile' post.author.username %}" class="mini-author" onclick="event.stopPropagation();">{{ post.author.username }}</a>
+            <span class="mini-dot">·</span>
+            <span>{{ post.created_at|timesince }} ago</span>
+          </div>
+
+          {% if post.tags.all %}
+          <div class="grid-tags-row">
+            {% for tag in post.tags.all|slice:":2" %}
+            <a href="?q={{ tag.name }}" class="grid-tag" onclick="event.stopPropagation();">#{{ tag.name }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <h2 class="grid-title">{{ post.title }}</h2>
+          <p class="grid-excerpt">{{ post.preview_content }}</p>
+
+          <div class="grid-footer">
+            <form action="{% url 'like_post' post.pk %}" method="POST" class="like-form" onclick="event.stopPropagation();">
+              {% csrf_token %}
+              <button type="submit" class="act-btn {% if user in post.likes.all %}active like-active{% endif %}">
+                <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                <span class="count">{{ post.total_likes }}</span>
+              </button>
+            </form>
+
+            <a href="{% url 'post_detail' post.pk %}" class="act-btn" onclick="event.stopPropagation();">
+              <i class="far fa-comment"></i> {{ post.comment_count }}
+            </a>
+
+            {% if user.is_authenticated %}
+            <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form" onclick="event.stopPropagation();" style="margin-left:auto;">
+              {% csrf_token %}
+              <button type="submit" class="act-btn {% if post.is_bookmarked %}active{% endif %}">
+                <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+
+        </div>
+      </article>
+
+      {% endif %}
+      {% endfor %}
     </div>
     {% endif %}
 
+    <!-- ── Pagination ─────────────────────────── -->
     {% if page_obj.has_other_pages %}
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn"><i class="fas fa-chevron-left"></i>
-            Prev</a>
-        {% endif %}
-        <span class="page-info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next <i class="fas fa-chevron-right"></i></a>
-        {% endif %}
+    <div class="feed-pagination">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="page-pill">
+        <i class="fas fa-chevron-left" style="font-size:0.7rem;"></i> Prev
+      </a>
+      {% endif %}
+      <span class="page-info-pill">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="page-pill">
+        Next <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i>
+      </a>
+      {% endif %}
     </div>
     {% endif %}
-</section>
+
+  {% else %}
+
+    <!-- ── Empty State ────────────────────────── -->
+    <div class="feed-empty">
+      <div class="feed-empty-icon"><i class="fas fa-feather-alt"></i></div>
+      <h3>No stories yet</h3>
+      <p>Be the first to share a story with the community!</p>
+      <a href="{% url 'add_post' %}" class="btn-orange">Write the First Post</a>
+    </div>
+
+  {% endif %}
+
+</div>
 {% endblock %}
 
+
 {% block sidebar %}
-<div class="sidebar-widget">
-    <div class="widget-header"><i class="fas fa-hashtag"></i> Trending Topics</div>
-    <div class="widget-body">
-        {% if trending_tags %}
-        {% for tag in trending_tags %}
-        <a href="?q={{ tag.name }}" class="trending-tag-item">
-            <span class="tag-name"># {{ tag.name }}</span>
-            <span class="tag-count">{{ tag.post_count }}</span>
-        </a>
-        {% endfor %}
-        {% else %}
-        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">
-            <a href="?q=fiction" class="post-tag">#fiction</a>
-            <a href="?q=poetry" class="post-tag">#poetry</a>
-            <a href="?q=mystery" class="post-tag">#mystery</a>
-            <a href="?q=scifi" class="post-tag">#scifi</a>
-            <a href="?q=romance" class="post-tag">#romance</a>
-        </div>
-        {% endif %}
+
+<!-- Trending Topics -->
+<div class="sw-editorial">
+  <div class="sw-head"><i class="fas fa-hashtag"></i> Trending Topics</div>
+  <div class="sw-body">
+    {% if trending_tags %}
+    {% for tag in trending_tags %}
+    <a href="?q={{ tag.name }}" class="trending-row">
+      <div class="trending-row-left">
+        <span class="trending-num">#{{ forloop.counter }}</span>
+        <span class="trending-label">{{ tag.name }}</span>
+      </div>
+      <span class="trending-badge">{{ tag.post_count }}</span>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div class="tag-cloud">
+      <a href="?q=fiction"  class="tag-cloud-pill">#fiction</a>
+      <a href="?q=poetry"   class="tag-cloud-pill">#poetry</a>
+      <a href="?q=mystery"  class="tag-cloud-pill">#mystery</a>
+      <a href="?q=scifi"    class="tag-cloud-pill">#scifi</a>
+      <a href="?q=romance"  class="tag-cloud-pill">#romance</a>
+      <a href="?q=thriller" class="tag-cloud-pill">#thriller</a>
+      <a href="?q=essay"    class="tag-cloud-pill">#essay</a>
     </div>
+    {% endif %}
+  </div>
 </div>
 
+<!-- Join CTA (unauthenticated only) -->
 {% if not user.is_authenticated %}
-<div class="sidebar-widget" style="overflow:hidden;">
-    <div
-        style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:24px 20px;text-align:center;">
-        <i class="fas fa-book-reader" style="font-size:2rem;color:white;margin-bottom:12px;display:block;"></i>
-        <h3 style="font-family:'Outfit',sans-serif;color:white;font-weight:800;font-size:1.1rem;margin-bottom:6px;">Join
-            Bookish Brio</h3>
-        <p style="color:rgba(255,255,255,0.85);font-size:0.82rem;margin-bottom:20px;">Share stories, discover writers,
-            and build community.</p>
-        <div style="display:flex;gap:8px;flex-direction:column;">
-            <a href="{% url 'signup' %}" class="btn-orange"
-                style="background:white;color:var(--primary);box-shadow:none;justify-content:center;">Sign Up Free</a>
-            <a href="{% url 'login' %}"
-                style="color:rgba(255,255,255,0.9);font-size:0.82rem;text-decoration:none;text-align:center;">Already a
-                member? Log in</a>
-        </div>
-    </div>
+<div class="join-cta">
+  <i class="fas fa-book-reader join-cta-icon"></i>
+  <h3>Join Bookish Brio</h3>
+  <p>Share stories, discover writers, and build your reading community.</p>
+  <a href="{% url 'signup' %}" class="join-btn-primary">Sign Up — It's Free</a>
+  <a href="{% url 'login' %}" class="join-btn-ghost">Already a member? Log in</a>
 </div>
 {% endif %}
+
 {{ block.super }}
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.like-form').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const btn = this.querySelector('button');
-                const icon = btn.querySelector('i');
-                const countSpan = btn.querySelector('.count');
-                fetch(this.action, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                }).then(r => r.json()).then(data => {
-                    icon.className = data.liked ? 'fas fa-heart' : 'far fa-heart';
-                    btn.classList.toggle('active', data.liked);
-                    btn.classList.toggle('like-active', data.liked);
-                    if (data.liked) {
-                        icon.classList.add('heart-pop');
-                        setTimeout(() => icon.classList.remove('heart-pop'), 400);
-                    }
-                    countSpan.textContent = data.total_likes;
-                });
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
 
-        document.querySelectorAll('.bookmark-form').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const btn = this.querySelector('button');
-                const icon = btn.querySelector('i');
-                fetch(this.action, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                }).then(r => r.json()).then(data => {
-                    icon.className = data.bookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
-                    btn.classList.toggle('active', data.bookmarked);
-                });
-            });
-        });
+  document.querySelectorAll('.like-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const btn  = this.querySelector('button');
+      const icon = btn.querySelector('i');
+      const cnt  = btn.querySelector('.count');
+      fetch(this.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+      }).then(r => r.json()).then(data => {
+        icon.className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+        btn.classList.toggle('active',      data.liked);
+        btn.classList.toggle('like-active', data.liked);
+        if (data.liked) {
+          icon.classList.add('heart-pop');
+          setTimeout(() => icon.classList.remove('heart-pop'), 400);
+        }
+        cnt.textContent = data.total_likes;
+      });
     });
+  });
+
+  document.querySelectorAll('.bookmark-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const btn  = this.querySelector('button');
+      const icon = btn.querySelector('i');
+      fetch(this.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+      }).then(r => r.json()).then(data => {
+        icon.className = data.bookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+        btn.classList.toggle('active', data.bookmarked);
+      });
+    });
+  });
+
+});
 </script>
 {% endblock %}
