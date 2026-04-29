@@ -6,6 +6,11 @@ from .models import Post, Comment, Profile
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text='Required. Inform a valid email address.')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'password1' in self.fields:
+            self.fields['password1'].help_text = "Your password must contain at least 10 characters and cannot be a commonly used password."
+
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
@@ -13,7 +18,6 @@ class SignUpForm(UserCreationForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        # tags_input is a custom form field (not a model field), so it must NOT be in fields
         fields = ['title', 'content', 'image']
         exclude = ['tags']
         widgets = {
@@ -29,13 +33,16 @@ class PostForm(forms.ModelForm):
                 'rows': 6,
                 'style': 'width:100%; padding:12px; border:1px solid #3b2f2f; border-radius:6px; font-family:Roboto, sans-serif; resize:vertical; margin-bottom:15px; background-color:#fdfaf3;'
             }),
-            'tags_input': forms.TextInput(attrs={
-                'placeholder': 'Tags (comma separated)...',
-                'style': 'width:100%; padding:12px; border:1px solid #3b2f2f; border-radius:6px; margin-bottom:15px; background-color:#fdfaf3;'
-            })
         }
 
-    tags_input = forms.CharField(max_length=200, required=False)
+    tags_input = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Tags (comma separated)...',
+            'style': 'width:100%; padding:12px; border:1px solid #3b2f2f; border-radius:6px; margin-bottom:15px; background-color:#fdfaf3;'
+        })
+    )
 
     def save(self, commit=True):
         instance = super().save(commit=False)

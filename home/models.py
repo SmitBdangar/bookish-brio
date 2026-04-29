@@ -6,9 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 class Post(models.Model):
-    """
-    Model representing a blog/chat post with optional cover image and likes.
-    """
+ 
     title = models.CharField(max_length=200)
     content = models.TextField()
     image = models.ImageField(
@@ -32,9 +30,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def total_likes(self):
-        """
-        Returns the total number of likes for the post.
-        """
+    
         return self.likes.count()
 
     def __str__(self):
@@ -64,9 +60,7 @@ class Post(models.Model):
 
 
 class Bookmark(models.Model):
-    """
-    Model for users to bookmark/save posts for later reading.
-    """
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='bookmarked_by')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -80,9 +74,7 @@ class Bookmark(models.Model):
 
 
 class Notification(models.Model):
-    """
-    Model for user notifications (follows, likes, comments).
-    """
+
     NOTIFICATION_TYPES = (
         ('follow', 'New Follower'),
         ('like', 'Post Liked'),
@@ -106,9 +98,7 @@ class Notification(models.Model):
 
 
 class PostImage(models.Model):
-    """
-    Model to store multiple images for a single post (gallery images).
-    """
+
     post = models.ForeignKey(
         Post, 
         on_delete=models.CASCADE, 
@@ -122,9 +112,7 @@ class PostImage(models.Model):
 
 
 class Comment(models.Model):
-    """
-    Model representing a comment on a post.
-    """
+
     post = models.ForeignKey(
         Post, 
         on_delete=models.CASCADE, 
@@ -158,9 +146,7 @@ class Tag(models.Model):
 
 
 class Follow(models.Model):
-    """
-    Model representing a user following another user.
-    """
+
     follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
     following = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -173,14 +159,10 @@ class Follow(models.Model):
 
 
 class Profile(models.Model):
-    """
-    User profile model extending the built-in User model.
-    """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(max_length=500, blank=True)
     avatar = models.ImageField(upload_to='profiles/', blank=True, null=True)
     
-    # Social Media Links
     instagram_link = models.URLField(max_length=200, blank=True)
     twitter_link = models.URLField(max_length=200, blank=True)
     linkedin_link = models.URLField(max_length=200, blank=True)
@@ -196,6 +178,6 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    # Use get_or_create to prevent RelatedObjectDoesNotExist on first save
+
     profile, _ = Profile.objects.get_or_create(user=instance)
     profile.save()

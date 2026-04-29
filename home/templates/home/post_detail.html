@@ -1,116 +1,253 @@
 {% extends "home/base.html" %}
 
-{% block title %}{{ post.title }} - Bookish Brio{% endblock %}
+{% block title %}{{ post.title }} — Bookish Brio{% endblock %}
 
 {% block extra_css %}
 <style>
     .detail-card {
-        background: white;
+        background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 4px;
+        border-radius: var(--radius-xl);
         overflow: hidden;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 20px;
+    }
+
+    .detail-cover {
+        width: 100%;
+        max-height: 420px;
+        overflow: hidden;
+        background: hsl(220, 15%, 96%);
+    }
+
+    .detail-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
     }
 
     .detail-body {
-        padding: 24px;
+        padding: 32px;
+    }
+
+    .detail-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.9rem;
+        font-weight: 800;
+        line-height: 1.25;
+        letter-spacing: -0.5px;
+        color: var(--text-main);
+        margin: 16px 0;
     }
 
     .post-full-content {
-        font-size: 1.05rem;
-        line-height: 1.6;
-        color: #1c1c1c;
-        margin: 20px 0;
+        font-size: 1.02rem;
+        line-height: 1.8;
+        color: var(--text-body);
+        margin: 24px 0;
+    }
+
+    .post-full-content h1,
+    .post-full-content h2,
+    .post-full-content h3 {
+        font-family: 'Outfit', sans-serif;
+        color: var(--text-main);
+        margin: 1.5rem 0 0.75rem;
+        font-weight: 700;
+    }
+
+    .post-full-content p {
+        margin-bottom: 1rem;
     }
 
     .post-full-content img {
         max-width: 100%;
-        height: auto;
+        border-radius: var(--radius-md);
+        margin: 1rem 0;
+    }
+
+    .post-full-content blockquote {
+        border-left: 4px solid var(--primary);
+        background: var(--primary-glow);
+        padding: 14px 20px;
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        margin: 1.5rem 0;
+        color: var(--text-body);
+        font-style: italic;
+    }
+
+    .post-full-content code {
+        background: hsl(220, 18%, 95%);
+        padding: 2px 6px;
         border-radius: 4px;
-        margin: 10px 0;
+        font-size: 0.88em;
+    }
+
+    .post-full-content pre {
+        background: hsl(220, 25%, 14%);
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: var(--radius-md);
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+
+    .detail-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 16px 0 0;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
     }
 
     .comment-section {
-        background: white;
+        background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 4px;
-        margin-top: 16px;
-        padding: 16px;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
     }
 
-    .comment-form textarea {
+    .comment-section-header {
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .comment-form-wrap {
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .comment-textarea {
         width: 100%;
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 12px;
-        min-height: 100px;
-        margin-bottom: 12px;
+        padding: 14px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
         resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        background: var(--bg-subtle);
+        transition: var(--transition);
+        outline: none;
+        color: var(--text-main);
         display: block;
+        margin-bottom: 12px;
+    }
+
+    .comment-textarea:focus {
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 4px var(--primary-glow);
     }
 
     .comment-item {
-        padding: 12px 0;
-        border-bottom: 1px solid var(--border-light);
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+        transition: var(--transition);
     }
 
     .comment-item:last-child {
         border-bottom: none;
+    }
+
+    .comment-item:hover {
+        background: hsl(220, 20%, 99%);
+    }
+
+    .comment-author-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .comment-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, hsl(200, 80%, 55%), hsl(240, 70%, 60%));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.78rem;
+        font-family: 'Outfit', sans-serif;
+        flex-shrink: 0;
+    }
+
+    .comment-body {
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: var(--text-body);
+    }
+
+    .login-to-comment {
+        background: hsl(220, 20%, 98%);
+        border: 1.5px dashed var(--border);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        text-align: center;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <article class="detail-card">
+    {% if post.image %}
+    <div class="detail-cover">
+        <img src="{{ post.image.url }}" alt="{{ post.title }}">
+    </div>
+    {% endif %}
+
     <div class="detail-body">
         <div class="post-meta">
-            <a href="{% url 'public_profile' post.author.username %}" class="post-author">u/{{ post.author.username
-                }}</a>
-            <span>•</span>
+            <div class="post-author-avatar">{{ post.author.username|first|upper }}</div>
+            <a href="{% url 'public_profile' post.author.username %}" class="post-author">{{ post.author.username }}</a>
+            <span class="post-meta-dot">·</span>
             <span>{{ post.created_at|timesince }} ago</span>
             {% if post.reading_time %}
-            <span>•</span>
-            <span>{{ post.reading_time }}</span>
+            <span class="post-meta-dot">·</span>
+            <span><i class="far fa-clock" style="font-size:0.75rem;"></i> {{ post.reading_time }}</span>
             {% endif %}
         </div>
 
-        <h1 style="font-size: 1.5rem; font-weight: 700; margin: 12px 0;">{{ post.title }}</h1>
+        <h1 class="detail-title">{{ post.title }}</h1>
 
         {% if post.tags.all %}
-        <div class="post-tags" style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <div class="post-tags">
             {% for tag in post.tags.all %}
-            <a href="{% url 'index' %}?q={{ tag.name }}"
-                style="text-decoration: none; background: #f6f7f8; color: var(--text-meta); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">#{{
-                tag.name }}</a>
+            <a href="{% url 'index' %}?q={{ tag.name }}" class="post-tag">#{{ tag.name }}</a>
             {% endfor %}
         </div>
         {% endif %}
 
-        {% if post.image %}
-        <div class="post-image" style="margin: 0 -24px 20px -24px; background: #f0f0f0;">
-            <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width: 100%; height: auto; display: block;">
-        </div>
-        {% endif %}
+        <div class="post-full-content">{{ post.content|safe }}</div>
 
-        <div class="post-full-content">
-            {{ post.content|safe }}
-        </div>
-
-        <div class="post-actions" style="border-top: 1px solid var(--border-light); padding: 12px 0 0 0;">
+        <div class="detail-actions">
             <form action="{% url 'like_post' post.pk %}" method="POST" class="like-form">
                 {% csrf_token %}
-                <button type="submit" class="action-btn {% if user in post.likes.all %}active{% endif %}">
+                <button type="submit" class="action-btn {% if user in post.likes.all %}active like-active{% endif %}">
                     <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
                     <span class="count">{{ post.total_likes }}</span>
                 </button>
             </form>
-
-            <div class="action-btn active" style="cursor: default;">
+            <span class="action-btn" style="cursor:default;">
                 <i class="far fa-comment"></i>
-                <span>{{ post.comment_count }} Comments</span>
-            </div>
-
+                <span>{{ post.comment_count }}</span>
+            </span>
             {% if user.is_authenticated %}
-            <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form">
+            <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form"
+                style="margin-left:auto;">
                 {% csrf_token %}
                 <button type="submit" class="action-btn {% if post.is_bookmarked %}active{% endif %}">
                     <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
@@ -118,60 +255,105 @@
                 </button>
             </form>
             {% endif %}
+            {% if user == post.author %}
+            <a href="{% url 'delete_post' post.pk %}" class="action-btn"
+                style="margin-left:{% if not user.is_authenticated %}auto{% endif %};"
+                onclick="return confirm('Delete this post?');">
+                <i class="far fa-trash-alt" style="color:#e53e3e;"></i>
+            </a>
+            {% endif %}
         </div>
     </div>
 </article>
 
 <section class="comment-section">
-    <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 16px;">Add a comment</h3>
-    {% if user.is_authenticated %}
-    <form method="post" class="comment-form">
-        {% csrf_token %}
-        <textarea name="content" placeholder="What are your thoughts?" required></textarea>
-        <button type="submit" class="btn-orange">Comment</button>
-    </form>
-    {% else %}
-    <div style="padding: 20px; border: 1px dashed var(--border); text-align: center; border-radius: 4px;">
-        <p style="font-size: 0.9rem; color: var(--text-meta); margin-bottom: 12px;">Log in or sign up to leave a comment
-        </p>
-        <a href="{% url 'login' %}" class="btn-orange"
-            style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">Log In</a>
-        <a href="{% url 'signup' %}" class="btn-orange">Sign Up</a>
+    <div class="comment-section-header">
+        <i class="far fa-comments" style="color:var(--primary);"></i>
+        {{ post.comment_count }} Comment{{ post.comment_count|pluralize }}
     </div>
-    {% endif %}
 
-    <div class="comments-list" style="margin-top: 24px;">
+    <div class="comment-form-wrap">
+        {% if user.is_authenticated %}
+        <form method="post" class="comment-form">
+            {% csrf_token %}
+            <textarea name="content" class="comment-textarea" placeholder="Share your thoughts…" required></textarea>
+            <button type="submit" class="btn-orange">
+                <i class="fas fa-paper-plane"></i> Post Comment
+            </button>
+        </form>
+        {% else %}
+        <div class="login-to-comment">
+            <p style="color:var(--text-meta);font-size:0.9rem;margin-bottom:16px;">Log in to join the conversation</p>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                <a href="{% url 'login' %}" class="btn-ghost">Log In</a>
+                <a href="{% url 'signup' %}" class="btn-orange">Sign Up Free</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="comments-list">
         {% for comment in post.comments.all %}
         <div class="comment-item">
-            <div class="post-meta" style="margin-bottom: 4px;">
-                <a href="{% url 'public_profile' comment.author.username %}" class="post-author"
-                    style="font-size: 0.8rem;">u/{{ comment.author.username }}</a>
-                <span>•</span>
-                <span style="font-size: 0.8rem;">{{ comment.created_at|timesince }} ago</span>
+            <div class="comment-author-row">
+                <div class="comment-avatar"
+                    style="background:linear-gradient(135deg,hsl({{ comment.author.id|add:'180' }},70%,55%),hsl({{ comment.author.id|add:'240' }},70%,50%));">
+                    {{ comment.author.username|first|upper }}
+                </div>
+                <div>
+                    <a href="{% url 'public_profile' comment.author.username %}"
+                        style="font-weight:600;font-size:0.875rem;text-decoration:none;color:var(--text-main);">
+                        {{ comment.author.username }}
+                    </a>
+                    <div style="font-size:0.75rem;color:var(--text-meta);">{{ comment.created_at|timesince }} ago</div>
+                </div>
             </div>
-            <div style="font-size: 0.95rem;">{{ comment.content }}</div>
+            <div class="comment-body">{{ comment.content }}</div>
         </div>
         {% empty %}
-        <p style="text-align: center; color: var(--text-meta); padding: 20px; font-size: 0.9rem;">No comments yet.</p>
+        <div style="padding:40px;text-align:center;color:var(--text-meta);font-size:0.9rem;">
+            No comments yet. Be the first to respond!
+        </div>
         {% endfor %}
     </div>
 </section>
 {% endblock %}
 
+{% block sidebar %}
+<div class="sidebar-widget">
+    <div class="widget-header"><i class="fas fa-user"></i> About the Author</div>
+    <div class="widget-body" style="text-align:center;padding:20px;">
+        <div class="post-author-avatar" style="width:56px;height:56px;font-size:1.3rem;margin:0 auto 12px;">
+            {{ post.author.username|first|upper }}
+        </div>
+        <a href="{% url 'public_profile' post.author.username %}"
+            style="font-weight:700;text-decoration:none;color:var(--text-main);font-size:0.95rem;display:block;margin-bottom:4px;">
+            {{ post.author.username }}
+        </a>
+        {% if post.author.profile.bio %}
+        <p style="font-size:0.82rem;color:var(--text-meta);line-height:1.6;">{{ post.author.profile.bio|truncatewords:20
+            }}</p>
+        {% endif %}
+        <a href="{% url 'public_profile' post.author.username %}" class="btn-ghost"
+            style="margin-top:14px;width:100%;justify-content:center;">
+            View Profile
+        </a>
+    </div>
+</div>
+{{ block.super }}
+{% endblock %}
+
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Shared AJAX Logic (same as index.html)
-        const setupAjax = (formSelector, dataCallback) => {
-            document.querySelectorAll(formSelector).forEach(form => {
+        const setupAjax = (sel, cb) => {
+            document.querySelectorAll(sel).forEach(form => {
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
                     fetch(this.action, {
                         method: 'POST',
                         headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                    })
-                        .then(response => response.json())
-                        .then(data => dataCallback(this, data));
+                    }).then(r => r.json()).then(data => cb(this, data));
                 });
             });
         };
@@ -180,13 +362,10 @@
             const btn = form.querySelector('button');
             const icon = btn.querySelector('i');
             const count = btn.querySelector('.count');
-            if (data.liked) {
-                icon.className = 'fas fa-heart';
-                btn.classList.add('active');
-            } else {
-                icon.className = 'far fa-heart';
-                btn.classList.remove('active');
-            }
+            icon.className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+            btn.classList.toggle('active', data.liked);
+            btn.classList.toggle('like-active', data.liked);
+            if (data.liked) { icon.classList.add('heart-pop'); setTimeout(() => icon.classList.remove('heart-pop'), 400); }
             count.textContent = data.total_likes;
         });
 
@@ -194,15 +373,9 @@
             const btn = form.querySelector('button');
             const icon = btn.querySelector('i');
             const span = btn.querySelector('span');
-            if (data.bookmarked) {
-                icon.className = 'fas fa-bookmark';
-                btn.classList.add('active');
-                span.textContent = 'Saved';
-            } else {
-                icon.className = 'far fa-bookmark';
-                btn.classList.remove('active');
-                span.textContent = 'Save';
-            }
+            icon.className = data.bookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+            btn.classList.toggle('active', data.bookmarked);
+            if (span) span.textContent = data.bookmarked ? 'Saved' : 'Save';
         });
     });
 </script>

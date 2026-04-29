@@ -1,50 +1,58 @@
 {% extends "home/base.html" %}
 
-{% block title %}{{ profile_user.username }}'s Profile - Bookish Brio{% endblock %}
+{% block title %}{{ profile_user.username }}'s Profile — Bookish Brio{% endblock %}
 
 {% block extra_css %}
 <style>
-    .profile-card {
+    .profile-hero {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 40px 32px;
-        text-align: center;
+        border-radius: var(--radius-xl);
         margin-bottom: 24px;
-        box-shadow: var(--shadow-soft);
-        position: relative;
+        box-shadow: var(--shadow-md);
         overflow: hidden;
     }
 
-    .profile-card::before {
-        content: '';
+    .profile-banner {
+        height: 140px;
+        background: linear-gradient(135deg, var(--primary) 0%, hsl(200, 90%, 50%) 60%, var(--primary-dark) 100%);
+        position: relative;
+    }
+
+    .profile-banner-overlay {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 100px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        opacity: 0.1;
-        z-index: 0;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .profile-info {
+        padding: 0 32px 28px;
+    }
+
+    .profile-avatar-wrap {
+        margin-top: -48px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
     }
 
     .profile-avatar {
-        width: 120px;
-        height: 120px;
+        width: 96px;
+        height: 96px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: white;
-        margin: 0 auto 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3rem;
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
         font-weight: 800;
-        overflow: hidden;
         border: 4px solid white;
-        box-shadow: var(--shadow-premium);
-        position: relative;
-        z-index: 1;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        flex-shrink: 0;
     }
 
     .profile-avatar img {
@@ -55,73 +63,30 @@
 
     .profile-name {
         font-family: 'Outfit', sans-serif;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 800;
-        color: var(--text-main);
-        margin-bottom: 4px;
-        letter-spacing: -0.5px;
+        letter-spacing: -0.4px;
+        margin-bottom: 2px;
     }
 
-    .profile-username {
+    .profile-handle {
         color: var(--text-meta);
-        font-size: 1rem;
-        margin-bottom: 20px;
-        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 12px;
     }
 
     .profile-bio {
-        font-size: 1.05rem;
-        margin: 0 auto 24px;
-        line-height: 1.6;
-        color: var(--text-main);
-        max-width: 550px;
-    }
-
-    .social-links {
-        display: flex;
-        justify-content: center;
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-
-    .social-link {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        background: hsl(210, 15%, 96%);
-        color: var(--text-meta);
-        transition: var(--transition);
-        text-decoration: none;
-    }
-
-    .social-link:hover {
-        transform: translateY(-4px);
-        background: white;
-        box-shadow: var(--shadow-soft);
-        color: var(--primary);
-    }
-
-    .social-link.twitter:hover {
-        color: #1DA1F2;
-    }
-
-    .social-link.instagram:hover {
-        color: #E4405F;
-    }
-
-    .social-link.linkedin:hover {
-        color: #0A66C2;
+        font-size: 0.9rem;
+        color: var(--text-body);
+        line-height: 1.65;
+        margin-bottom: 16px;
+        max-width: 480px;
     }
 
     .profile-stats {
         display: flex;
-        justify-content: center;
-        gap: 32px;
-        padding: 24px 0;
+        gap: 28px;
+        padding: 18px 0;
         border-top: 1px solid var(--border);
         margin-top: 8px;
     }
@@ -129,134 +94,156 @@
     .stat-item {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
     }
 
     .stat-val {
         font-family: 'Outfit', sans-serif;
+        font-size: 1.3rem;
         font-weight: 800;
-        font-size: 1.4rem;
         color: var(--text-main);
+        line-height: 1;
     }
 
     .stat-lab {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
+        font-weight: 600;
         color: var(--text-meta);
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        font-weight: 700;
-        margin-top: 4px;
+        letter-spacing: 0.8px;
+        margin-top: 3px;
     }
 
-    .section-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.25rem;
-        font-weight: 800;
-        margin-bottom: 20px;
-        color: var(--text-main);
+    .social-links {
+        display: flex;
+        gap: 8px;
+    }
+
+    .social-link {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
-        gap: 10px;
-        letter-spacing: -0.3px;
+        justify-content: center;
+        background: hsl(220, 18%, 95%);
+        color: var(--text-meta);
+        text-decoration: none;
+        font-size: 1rem;
+        transition: var(--transition);
     }
 
-    .edit-form-card {
+    .social-link:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .social-link.twitter:hover {
+        background: #e8f5fd;
+        color: #1DA1F2;
+    }
+
+    .social-link.instagram:hover {
+        background: #fce4ec;
+        color: #E4405F;
+    }
+
+    .social-link.linkedin:hover {
+        background: #e8f0fb;
+        color: #0A66C2;
+    }
+
+    .edit-card {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 20px;
+        border-radius: var(--radius-xl);
         padding: 32px;
-        margin-bottom: 32px;
-        box-shadow: var(--shadow-soft);
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-sm);
     }
 
     .form-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 16px;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 640px) {
         .form-grid {
             grid-template-columns: 1fr 1fr;
         }
     }
 
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-bottom: 8px;
+    .section-heading {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
         color: var(--text-main);
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        width: 100%;
-        padding: 12px 16px;
-        border: 1.5px solid var(--border);
-        border-radius: 12px;
-        font-size: 1rem;
-        background: hsl(210, 15%, 98%);
-        transition: var(--transition);
-        outline: none;
-        font-family: inherit;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-        border-color: var(--primary);
-        background: white;
-        box-shadow: 0 0 0 4px hsla(16, 100%, 50%, 0.1);
-    }
-
-    .btn-orange.following {
-        background: #f0f0f0 !important;
-        color: #1c1c1c !important;
-        box-shadow: none !important;
+    .section-heading i {
+        color: var(--primary);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <div class="profile-card">
-        <div class="profile-avatar">
-            {% if profile_user.profile.avatar %}
-            <img src="{{ profile_user.profile.avatar.url }}" alt="Avatar">
-            {% else %}
-            {{ profile_user.username|first|upper }}
-            {% endif %}
+<div class="profile-hero">
+    <div class="profile-banner">
+        <div class="profile-banner-overlay"></div>
+    </div>
+    <div class="profile-info">
+        <div class="profile-avatar-wrap">
+            <div class="profile-avatar">
+                {% if profile_user.profile.avatar %}
+                <img src="{{ profile_user.profile.avatar.url }}" alt="{{ profile_user.username }}">
+                {% else %}
+                {{ profile_user.username|first|upper }}
+                {% endif %}
+            </div>
+            <div style="display:flex;gap:8px;padding-bottom:4px;">
+                {% if user.is_authenticated and user != profile_user %}
+                <form action="{% url 'follow_user' profile_user.username %}" method="POST" id="follow-form">
+                    {% csrf_token %}
+                    <button type="submit" id="follow-btn"
+                        class="{% if is_following %}btn-ghost{% else %}btn-orange{% endif %}">
+                        {% if is_following %}<i class="fas fa-user-check"></i> Following{% else %}<i
+                            class="fas fa-user-plus"></i> Follow{% endif %}
+                    </button>
+                </form>
+                {% elif user == profile_user %}
+                <a href="{% url 'logout' %}" class="btn-ghost"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                <button onclick="document.getElementById('edit-container').scrollIntoView({behavior:'smooth'})"
+                    class="btn-orange">
+                    <i class="fas fa-cog"></i> Edit Profile
+                </button>
+                {% endif %}
+            </div>
         </div>
-        <h2 class="profile-name">{{ profile_user.first_name|default:profile_user.username }}</h2>
-        <p class="profile-username">u/{{ profile_user.username }}</p>
+
+        <h1 class="profile-name">{{ profile_user.first_name|default:profile_user.username }}</h1>
+        <p class="profile-handle">@{{ profile_user.username }}</p>
 
         {% if profile_user.profile.bio %}
         <p class="profile-bio">{{ profile_user.profile.bio }}</p>
         {% endif %}
 
-        <div class="social-links">
+        <div class="social-links" style="margin-bottom:16px;">
             {% if profile_user.profile.twitter_link %}
             <a href="{{ profile_user.profile.twitter_link }}" target="_blank" class="social-link twitter"
-                title="Twitter">
-                <i class="fab fa-twitter"></i>
-            </a>
+                title="Twitter"><i class="fab fa-twitter"></i></a>
             {% endif %}
             {% if profile_user.profile.instagram_link %}
             <a href="{{ profile_user.profile.instagram_link }}" target="_blank" class="social-link instagram"
-                title="Instagram">
-                <i class="fab fa-instagram"></i>
-            </a>
+                title="Instagram"><i class="fab fa-instagram"></i></a>
             {% endif %}
             {% if profile_user.profile.linkedin_link %}
             <a href="{{ profile_user.profile.linkedin_link }}" target="_blank" class="social-link linkedin"
-                title="LinkedIn">
-                <i class="fab fa-linkedin"></i>
-            </a>
+                title="LinkedIn"><i class="fab fa-linkedin"></i></a>
             {% endif %}
         </div>
 
@@ -264,6 +251,10 @@
             <div class="stat-item">
                 <div class="stat-val" id="followers-count">{{ profile_user.followers.count }}</div>
                 <div class="stat-lab">Followers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">{{ profile_user.following.count }}</div>
+                <div class="stat-lab">Following</div>
             </div>
             <div class="stat-item">
                 <div class="stat-val">{{ user_posts.count }}</div>
@@ -274,114 +265,99 @@
                 <div class="stat-lab">Joined</div>
             </div>
         </div>
+    </div>
+</div>
 
-        {% if user.is_authenticated and user != profile_user %}
-        <form action="{% url 'follow_user' profile_user.username %}" method="POST" id="follow-form"
-            style="margin-top: 24px;">
-            {% csrf_token %}
-            <button type="submit" id="follow-btn" class="btn-orange {% if is_following %}following{% endif %}"
-                style="width: 100%; max-width: 240px;">
-                {% if is_following %}Following{% else %}Follow{% endif %}
-            </button>
-        </form>
-        {% elif user == profile_user %}
-        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
-            <a href="{% url 'logout' %}" class="btn-orange"
-                style="background: #f0f0f0; color: #1c1c1c; box-shadow: none;">Log Out</a>
-            <button onclick="document.getElementById('edit-container').scrollIntoView({behavior:'smooth'})"
-                class="btn-orange">Edit Profile</button>
+{% if user == profile_user %}
+<div class="edit-card" id="edit-container">
+    <h2 class="section-heading"><i class="fas fa-cog"></i> Profile Settings</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group"><label>Username</label>{{ u_form.username }}</div>
+            <div class="form-group"><label>Email</label>{{ u_form.email }}</div>
         </div>
+        <div class="form-group"><label>Bio</label>{{ p_form.bio }}</div>
+        <div class="form-group"><label>Profile Photo</label>{{ p_form.avatar }}</div>
+        <div class="form-grid">
+            <div class="form-group"><label>Twitter URL</label>{{ p_form.twitter_link }}</div>
+            <div class="form-group"><label>Instagram URL</label>{{ p_form.instagram_link }}</div>
+            <div class="form-group"><label>LinkedIn URL</label>{{ p_form.linkedin_link }}</div>
+        </div>
+        <button type="submit" class="btn-orange"
+            style="width:100%;justify-content:center;height:46px;font-size:0.95rem;margin-top:4px;">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    </form>
+</div>
+{% endif %}
+
+
+<h2 class="section-heading" style="margin-bottom:16px;"><i class="fas fa-pen-nib"></i> Posts by {{ profile_user.username
+    }}</h2>
+<div class="posts-feed">
+    {% for post in user_posts %}
+    <article class="post-card" onclick="window.location.href=this.dataset.url;"
+        data-url="{% url 'post_detail' post.pk %}">
+        <div class="post-main">
+            <div style="display:flex;align-items:flex-start;gap:14px;">
+                <div style="flex:1;min-width:0;">
+                    <h2 class="post-title">{{ post.title }}</h2>
+                    <div class="post-meta" style="margin-bottom:0;">
+                        <i class="far fa-clock" style="font-size:0.78rem;"></i>
+                        <span>{{ post.created_at|timesince }} ago</span>
+                        <span class="post-meta-dot">·</span>
+                        <i class="far fa-heart" style="font-size:0.78rem;"></i>
+                        <span>{{ post.total_likes }}</span>
+                        <span class="post-meta-dot">·</span>
+                        <i class="far fa-comment" style="font-size:0.78rem;"></i>
+                        <span>{{ post.comments.count }}</span>
+                    </div>
+                </div>
+                {% if post.image %}
+                <div
+                    style="width:64px;height:64px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;border:1px solid var(--border);">
+                    <img src="{{ post.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;"
+                        loading="lazy">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-feather-alt"></i></div>
+        <h3>No posts yet</h3>
+        <p>{% if user == profile_user %}Share your first story!{% else %}This writer hasn't posted yet.{% endif %}</p>
+        {% if user == profile_user %}
+        <a href="{% url 'add_post' %}" class="btn-orange">Create Post</a>
         {% endif %}
     </div>
-
-    {% if user == profile_user %}
-    <div class="edit-form-card" id="edit-container">
-        <h3 class="section-title"><i class="fas fa-cog" style="color: var(--primary);"></i> Profile Settings</h3>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Username</label>
-                    {{ u_form.username }}
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    {{ u_form.email }}
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Bio</label>
-                {{ p_form.bio }}
-            </div>
-            <div class="form-group">
-                <label>Avatar</label>
-                <div style="font-size: 0.9rem; color: var(--text-meta);">{{ p_form.avatar }}</div>
-            </div>
-            <div class="form-grid">
-                <div class="form-group"><label>Twitter URL</label>{{ p_form.twitter_link }}</div>
-                <div class="form-group"><label>Instagram URL</label>{{ p_form.instagram_link }}</div>
-                <div class="form-group"><label>LinkedIn URL</label>{{ p_form.linkedin_link }}</div>
-            </div>
-            <button type="submit" class="btn-orange"
-                style="width: 100%; height: 48px; margin-top: 12px; font-size: 1rem;">Update Profile
-                Information</button>
-        </form>
-    </div>
-    {% endif %}
-
-    <h3 class="section-title"><i class="fas fa-pen-nib" style="color: var(--primary);"></i> Recent Posts</h3>
-    <div class="posts-feed">
-        {% for post in user_posts %}
-        <article class="post-card" onclick="window.location.href=this.dataset.url;"
-            data-url="{% url 'post_detail' post.pk %}">
-            <div class="post-main">
-                <h2 class="post-title">{{ post.title }}</h2>
-                <div class="post-meta" style="margin-bottom: 0;">
-                    <i class="far fa-clock"></i>
-                    <span>{{ post.created_at|timesince }} ago</span>
-                    <span style="margin: 0 8px;">•</span>
-                    <i class="far fa-comment"></i>
-                    <span>{{ post.comments.count }} comments</span>
-                </div>
-            </div>
-        </article>
-        {% empty %}
-        <div
-            style="text-align: center; padding: 60px; background: white; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-soft);">
-            <div
-                style="width: 64px; height: 64px; background: hsl(210, 15%, 96%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                <i class="fas fa-feather fa-2x" style="color: var(--text-meta);"></i>
-            </div>
-            <p style="color: var(--text-meta); font-weight: 600;">No posts shared yet.</p>
-        </div>
-        {% endfor %}
-    </div>
+    {% endfor %}
 </div>
 {% endblock %}
 
 {% block sidebar %}
 <div class="sidebar-widget">
-    <div class="widget-title">About {{ profile_user.username }}</div>
-    <div style="padding: 20px;">
-        <div style="font-size: 0.95rem; line-height: 1.6;">
-            <p style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
-                <i class="far fa-calendar-alt" style="color: var(--primary);"></i>
-                <span>Member since {{ profile_user.date_joined|date:"M Y" }}</span>
-            </p>
-            <div class="social-links" style="justify-content: flex-start; margin-bottom: 0; margin-top: 20px;">
-                {% if profile_user.profile.twitter_link %}
-                <a href="{{ profile_user.profile.twitter_link }}" target="_blank" class="social-link twitter"
-                    style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="fab fa-twitter"></i></a>
-                {% endif %}
-                {% if profile_user.profile.instagram_link %}
-                <a href="{{ profile_user.profile.instagram_link }}" target="_blank" class="social-link instagram"
-                    style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="fab fa-instagram"></i></a>
-                {% endif %}
-                {% if profile_user.profile.linkedin_link %}
-                <a href="{{ profile_user.profile.linkedin_link }}" target="_blank" class="social-link linkedin"
-                    style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="fab fa-linkedin"></i></a>
-                {% endif %}
-            </div>
+    <div class="widget-header"><i class="fas fa-calendar-alt"></i> Member Info</div>
+    <div class="widget-body">
+        <p style="font-size:0.85rem;color:var(--text-body);margin-bottom:10px;">
+            <i class="far fa-calendar" style="color:var(--primary);margin-right:6px;"></i>
+            Joined {{ profile_user.date_joined|date:"F Y" }}
+        </p>
+        <div class="social-links">
+            {% if profile_user.profile.twitter_link %}
+            <a href="{{ profile_user.profile.twitter_link }}" target="_blank" class="social-link twitter"><i
+                    class="fab fa-twitter"></i></a>
+            {% endif %}
+            {% if profile_user.profile.instagram_link %}
+            <a href="{{ profile_user.profile.instagram_link }}" target="_blank" class="social-link instagram"><i
+                    class="fab fa-instagram"></i></a>
+            {% endif %}
+            {% if profile_user.profile.linkedin_link %}
+            <a href="{{ profile_user.profile.linkedin_link }}" target="_blank" class="social-link linkedin"><i
+                    class="fab fa-linkedin"></i></a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -397,34 +373,23 @@
                 e.preventDefault();
                 const btn = document.getElementById('follow-btn');
                 const count = document.getElementById('followers-count');
-
                 fetch(this.action, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_following) {
-                            btn.textContent = 'Following';
-                            btn.style.background = '#f0f0f0';
-                            btn.style.color = '#1c1c1c';
-                            btn.style.boxShadow = 'none';
-                        } else {
-                            btn.textContent = 'Follow';
-                            btn.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
-                            btn.style.color = 'white';
-                            btn.style.boxShadow = '0 4px 15px hsla(16, 100%, 50%, 0.3)';
-                        }
-                        if (count) count.textContent = data.followers_count;
-                    });
+                }).then(r => r.json()).then(data => {
+                    if (data.is_following) {
+                        btn.className = 'btn-ghost';
+                        btn.innerHTML = '<i class="fas fa-user-check"></i> Following';
+                    } else {
+                        btn.className = 'btn-orange';
+                        btn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+                    }
+                    if (count) count.textContent = data.followers_count;
+                });
             });
         }
-
-        // Add form-control class to Django form fields
-        document.querySelectorAll('.edit-form-card input, .edit-form-card textarea').forEach(el => {
-            if (el.type !== 'file' && el.type !== 'checkbox') {
-                el.classList.add('form-control');
-            }
+        document.querySelectorAll('.edit-card input, .edit-card textarea').forEach(el => {
+            if (el.type !== 'file' && el.type !== 'checkbox') el.classList.add('form-control');
         });
     });
 </script>

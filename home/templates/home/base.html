@@ -5,41 +5,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Bookish Brio — A community-driven social blogging platform. Share stories, discover trending posts, and connect with readers.">
     <title>{% block title %}Bookish Brio{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'home/css/main.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 
 <body
     class="{% if request.resolver_match.url_name == 'login' %}hide-on-login-page{% elif request.resolver_match.url_name == 'signup' %}hide-on-signup-page{% endif %}">
+
     <header class="header">
         <div class="header-content">
             <a href="{% url 'index' %}" class="logo-link">
-                <i class="fas fa-book-reader fa-lg"></i>
+                <i class="fas fa-book-reader"></i>
                 <h1>Bookish Brio</h1>
             </a>
+
             <div class="search-container">
                 <form action="{% url 'search_enhanced' %}" method="get" class="search-form">
-                    <i class="fas fa-search" style="color: #878a8c; margin-left: 10px;"></i>
-                    <input type="text" name="q" placeholder="Search" value="{{ request.GET.q|default:'' }}">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" placeholder="Search posts, topics, people…"
+                        value="{{ request.GET.q|default:'' }}" autocomplete="off">
                 </form>
             </div>
+
             <div class="header-actions">
                 {% if user.is_authenticated %}
-                <a href="{% url 'profile' %}" class="user-avatar-link" style="text-decoration: none;">
-                    <div class="user-avatar"
-                        style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-                        {{ user.username|first|upper }}
-                    </div>
+                <a href="{% url 'notifications' %}" class="header-icon-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="notif-dot"></span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'add_post' %}" class="btn-orange" style="padding:8px 16px;font-size:0.82rem;">
+                    <i class="fas fa-plus"></i><span style="display:none;" class="create-label">Create</span>
+                </a>
+                <a href="{% url 'profile' %}" class="user-avatar-link" title="{{ user.username }}">
+                    <div class="user-avatar">{{ user.username|first|upper }}</div>
                 </a>
                 {% else %}
                 {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' %}
-                <a href="{% url 'login' %}" class="btn-orange">Log In</a>
+                <a href="{% url 'login' %}" class="btn-ghost">Log In</a>
+                <a href="{% url 'signup' %}" class="btn-orange">Sign Up</a>
                 {% endif %}
                 {% endif %}
             </div>
@@ -51,71 +66,166 @@
             {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                <div class="alert"
-                    style="background: white; border: 1px solid var(--border); padding: 12px; margin-bottom: 10px; border-radius: 4px; box-shadow: var(--shadow-sm); border-left: 4px solid var(--primary);">
-                    {{ message }}
-                </div>
+                <div class="alert">{{ message }}</div>
                 {% endfor %}
             </div>
             {% endif %}
             {% block content %}{% endblock %}
         </section>
+
         <aside class="sidebar">
             {% block sidebar %}
-            <div
-                style="background: white; border: 1px solid var(--border); border-radius: 4px; padding: 12px; box-shadow: var(--shadow-sm);">
-                <p style="font-size: 0.8rem; color: var(--text-meta);">© 2025 Bookish Brio Inc. All rights reserved.</p>
+            <div class="sidebar-widget">
+                <div class="widget-header">
+                    <i class="fas fa-compass"></i> Navigation
+                </div>
+                <div class="widget-body" style="padding:10px 10px;">
+                    <nav class="sidebar-nav">
+                        <a href="{% url 'index' %}"
+                            class="sidebar-nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                        <a href="{% url 'trending' %}"
+                            class="sidebar-nav-item {% if request.resolver_match.url_name == 'trending' %}active{% endif %}">
+                            <i class="fas fa-fire"></i> Trending
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'bookmarks' %}"
+                            class="sidebar-nav-item {% if request.resolver_match.url_name == 'bookmarks' %}active{% endif %}">
+                            <i class="fas fa-bookmark"></i> Bookmarks
+                        </a>
+                        <a href="{% url 'notifications' %}"
+                            class="sidebar-nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                            <i class="fas fa-bell"></i> Notifications
+                        </a>
+                        <a href="{% url 'profile' %}"
+                            class="sidebar-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="{% url 'add_post' %}" class="sidebar-nav-item create-item">
+                            <i class="fas fa-plus-circle"></i> Create Post
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+            <div style="padding:14px 16px;font-size:0.75rem;color:var(--text-meta);line-height:1.8;">
+                © 2025 Bookish Brio Inc. · All rights reserved.
             </div>
             {% endblock %}
         </aside>
     </main>
 
     <nav class="bottom-nav">
-        <a href="{% url 'index' %}" class="nav-item">
+        <a href="{% url 'index' %}" class="nav-item" id="nav-home">
             <i class="fas fa-home"></i>
             <span>Home</span>
         </a>
-        <a href="{% url 'trending' %}" class="nav-item">
+        <a href="{% url 'trending' %}" class="nav-item" id="nav-trending">
             <i class="fas fa-fire"></i>
             <span>Trending</span>
         </a>
-        <a href="{% url 'add_post' %}" class="nav-item">
-            <i class="fas fa-plus-circle" style="font-size: 1.5rem; color: var(--primary);"></i>
+        <a href="{% url 'add_post' %}" class="nav-item nav-create" id="nav-create" title="Create Post">
+            <i class="fas fa-plus"></i>
         </a>
-        <a href="{% url 'bookmarks' %}" class="nav-item">
+        <a href="{% url 'bookmarks' %}" class="nav-item" id="nav-bookmarks">
             <i class="fas fa-bookmark"></i>
             <span>Saved</span>
         </a>
-        <a href="{% url 'profile' %}" class="nav-item">
+        <a href="{% url 'profile' %}" class="nav-item" id="nav-profile">
             <i class="fas fa-user"></i>
             <span>Profile</span>
         </a>
     </nav>
 
+    <style>
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-body);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-nav-item i {
+            width: 18px;
+            text-align: center;
+            color: var(--text-meta);
+        }
+
+        .sidebar-nav-item:hover {
+            background: hsl(220, 18%, 96%);
+            color: var(--text-main);
+        }
+
+        .sidebar-nav-item:hover i {
+            color: var(--primary);
+        }
+
+        .sidebar-nav-item.active {
+            background: var(--primary-glow);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item.active i {
+            color: var(--primary);
+        }
+
+        .sidebar-nav-item.create-item {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item.create-item i {
+            color: white;
+        }
+
+        .sidebar-nav-item.create-item:hover {
+            opacity: 0.9;
+        }
+
+        @media (min-width: 600px) {
+            .create-label {
+                display: inline !important;
+            }
+        }
+    </style>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // General AJAX setup
-            const getCookie = (name) => {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
+            const getCookie = name => {
+                let v = null;
+                if (document.cookie) {
+                    document.cookie.split(';').forEach(c => {
+                        c = c.trim();
+                        if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+                    });
                 }
-                return cookieValue;
+                return v;
             };
             window.csrfToken = getCookie('csrftoken');
 
-            // Handle active nav state
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.getAttribute('href') === currentPath) {
-                    item.classList.add('active');
+            const path = window.location.pathname;
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(a => {
+                const href = a.getAttribute('href');
+                if (href && href !== '#' && path.startsWith(href) && href !== '/') {
+                    a.classList.add('active');
+                } else if (href === '/' && path === '/') {
+                    a.classList.add('active');
                 }
             });
         });

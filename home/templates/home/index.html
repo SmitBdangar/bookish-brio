@@ -1,99 +1,115 @@
 {% extends "home/base.html" %}
 
-{% block title %}Bookish Brio - Share Your Stories{% endblock %}
+{% block title %}Bookish Brio — Share Your Stories{% endblock %}
 
 {% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div>
+        <h2 style="font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-0.3px;">
+            {% if user.is_authenticated %}Your Feed{% else %}Explore Posts{% endif %}
+        </h2>
+        <p style="color:var(--text-meta);font-size:0.85rem;margin-top:2px;">
+            {% if user.is_authenticated %}Stories from the community{% else %}Join Bookish Brio to personalise your
+            feed{% endif %}
+        </p>
+    </div>
+    <div class="search-filters" style="margin-bottom:0;">
+        <a href="{% url 'index' %}" class="filter-chip {% if not request.GET.sort %}active{% endif %}">✨ Latest</a>
+        <a href="{% url 'trending' %}" class="filter-chip">🔥 Trending</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'bookmarks' %}" class="filter-chip">🔖 Saved</a>
+        {% endif %}
+    </div>
+</div>
+
 <section class="posts-feed">
     {% if page_obj %}
     {% for post in page_obj %}
     <article class="post-card" onclick="window.location.href=this.dataset.url;"
         data-url="{% url 'post_detail' post.pk %}">
+
+        {% if post.image %}
+        <div class="post-image-wrap" style="height:220px;">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+        </div>
+        {% endif %}
+
         <div class="post-main">
             <div class="post-meta">
+                <div class="post-author-avatar">{{ post.author.username|first|upper }}</div>
                 <a href="{% url 'public_profile' post.author.username %}" class="post-author"
                     onclick="event.stopPropagation();">
-                    u/{{ post.author.username }}
+                    {{ post.author.username }}
                 </a>
-                <span>•</span>
+                <span class="post-meta-dot">·</span>
                 <span>{{ post.created_at|timesince }} ago</span>
                 {% if post.reading_time %}
-                <span>•</span>
-                <span>{{ post.reading_time }}</span>
+                <span class="post-meta-dot">·</span>
+                <span><i class="far fa-clock" style="font-size:0.75rem;"></i> {{ post.reading_time }}</span>
                 {% endif %}
             </div>
 
             <h2 class="post-title">{{ post.title }}</h2>
 
-            {% if post.image %}
-            <div class="post-image"
-                style="margin: -12px -12px 12px -12px; max-height: 512px; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                <img src="{{ post.image.url }}" alt="{{ post.title }}"
-                    style="width: 100%; height: auto; display: block;">
+            {% if post.tags.all %}
+            <div class="post-tags">
+                {% for tag in post.tags.all|slice:":3" %}
+                <a href="?q={{ tag.name }}" class="post-tag" onclick="event.stopPropagation();">#{{ tag.name }}</a>
+                {% endfor %}
             </div>
             {% endif %}
 
-            <div class="post-content-preview"
-                style="font-size: 0.95rem; color: #4a4a4a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-clamp: 3; overflow: hidden;">
-                {{ post.preview_content }}
-            </div>
+            <div class="post-content-preview">{{ post.preview_content }}</div>
         </div>
 
         <div class="post-actions">
-            <div class="engagement-item" style="display: flex; align-items: center; gap: 4px;">
-                <form action="{% url 'like_post' post.pk %}" method="POST" class="like-form"
-                    onclick="event.stopPropagation();">
-                    {% csrf_token %}
-                    <button type="submit" class="action-btn {% if user in post.likes.all %}active{% endif %}"
-                        title="Like">
-                        <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
-                        <span class="count">{{ post.total_likes }}</span>
-                    </button>
-                </form>
-            </div>
+            <form action="{% url 'like_post' post.pk %}" method="POST" class="like-form"
+                onclick="event.stopPropagation();">
+                {% csrf_token %}
+                <button type="submit" class="action-btn {% if user in post.likes.all %}active like-active{% endif %}"
+                    title="Like">
+                    <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                    <span class="count">{{ post.total_likes }}</span>
+                </button>
+            </form>
 
-            <div class="engagement-item">
-                <a href="{% url 'post_detail' post.pk %}" class="action-btn" onclick="event.stopPropagation();">
-                    <i class="far fa-comment"></i>
-                    <span>{{ post.comment_count }}</span>
-                </a>
-            </div>
+            <a href="{% url 'post_detail' post.pk %}" class="action-btn" onclick="event.stopPropagation();"
+                title="Comments">
+                <i class="far fa-comment"></i>
+                <span>{{ post.comment_count }}</span>
+            </a>
 
             {% if user.is_authenticated %}
-            <div class="engagement-item">
-                <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form"
-                    onclick="event.stopPropagation();">
-                    {% csrf_token %}
-                    <button type="submit" class="action-btn {% if post.is_bookmarked %}active{% endif %}" title="Save">
-                        <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
-                    </button>
-                </form>
-            </div>
+            <form action="{% url 'bookmark_post' post.pk %}" method="POST" class="bookmark-form"
+                onclick="event.stopPropagation();" style="margin-left:auto;">
+                {% csrf_token %}
+                <button type="submit" class="action-btn {% if post.is_bookmarked %}active{% endif %}" title="Save">
+                    <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
+                </button>
+            </form>
             {% endif %}
         </div>
     </article>
     {% endfor %}
+
     {% else %}
-    <div
-        style="background: white; padding: 60px; text-align: center; border-radius: 4px; border: 1px solid var(--border);">
-        <i class="fas fa-feather fa-3x" style="margin-bottom: 16px; opacity: 0.1;"></i>
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-feather-alt"></i></div>
         <h3>No posts yet</h3>
-        <p>Be the first to share a story!</p>
-        <a href="{% url 'add_post' %}" class="btn-orange" style="margin-top: 20px;">Create Post</a>
+        <p>Be the first to share a story with the community!</p>
+        <a href="{% url 'add_post' %}" class="btn-orange">Create Post</a>
     </div>
     {% endif %}
 
     {% if page_obj.has_other_pages %}
-    <div class="pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 24px;">
+    <div class="pagination">
         {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="btn-orange"
-            style="background: #f6f7f8; color: var(--text-main); font-size: 0.85rem;">Previous</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn"><i class="fas fa-chevron-left"></i>
+            Prev</a>
         {% endif %}
-        <span
-            style="padding: 8px 16px; background: white; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">Page
-            {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        <span class="page-info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="btn-orange"
-            style="background: #f6f7f8; color: var(--text-main); font-size: 0.85rem;">Next</a>
+        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next <i class="fas fa-chevron-right"></i></a>
         {% endif %}
     </div>
     {% endif %}
@@ -101,92 +117,87 @@
 {% endblock %}
 
 {% block sidebar %}
-<div class="sidebar-widget"
-    style="background: white; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 16px; overflow: hidden;">
-    <div style="background: var(--primary); color: white; padding: 12px; font-weight: 700; font-size: 0.9rem;">
-        Trending Topics
-    </div>
-    <div style="padding: 12px;">
+<div class="sidebar-widget">
+    <div class="widget-header"><i class="fas fa-hashtag"></i> Trending Topics</div>
+    <div class="widget-body">
         {% if trending_tags %}
-        <ul style="list-style: none;">
-            {% for tag in trending_tags %}
-            <li style="margin-bottom: 12px;">
-                <a href="?q={{ tag.name }}"
-                    style="text-decoration: none; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
-                    <span><i class="fas fa-hashtag" style="color: var(--primary); margin-right: 6px;"></i>{{ tag.name
-                        }}</span>
-                    <span style="color: var(--text-meta);">{{ tag.post_count }}</span>
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
+        {% for tag in trending_tags %}
+        <a href="?q={{ tag.name }}" class="trending-tag-item">
+            <span class="tag-name"># {{ tag.name }}</span>
+            <span class="tag-count">{{ tag.post_count }}</span>
+        </a>
+        {% endfor %}
         {% else %}
-        <div style="text-align: center; padding: 12px 0;">
-            <p style="font-size: 0.85rem; color: var(--text-meta); margin-bottom: 12px;">No active trends, but check
-                these out:</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-                <a href="?q=fiction" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#fiction</a>
-                <a href="?q=poetry" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#poetry</a>
-                <a href="?q=mystery" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#mystery</a>
-                <a href="?q=scifi" class="filter-chip" style="padding: 4px 12px; font-size: 0.75rem;">#scifi</a>
-            </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">
+            <a href="?q=fiction" class="post-tag">#fiction</a>
+            <a href="?q=poetry" class="post-tag">#poetry</a>
+            <a href="?q=mystery" class="post-tag">#mystery</a>
+            <a href="?q=scifi" class="post-tag">#scifi</a>
+            <a href="?q=romance" class="post-tag">#romance</a>
         </div>
         {% endif %}
     </div>
 </div>
+
+{% if not user.is_authenticated %}
+<div class="sidebar-widget" style="overflow:hidden;">
+    <div
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:24px 20px;text-align:center;">
+        <i class="fas fa-book-reader" style="font-size:2rem;color:white;margin-bottom:12px;display:block;"></i>
+        <h3 style="font-family:'Outfit',sans-serif;color:white;font-weight:800;font-size:1.1rem;margin-bottom:6px;">Join
+            Bookish Brio</h3>
+        <p style="color:rgba(255,255,255,0.85);font-size:0.82rem;margin-bottom:20px;">Share stories, discover writers,
+            and build community.</p>
+        <div style="display:flex;gap:8px;flex-direction:column;">
+            <a href="{% url 'signup' %}" class="btn-orange"
+                style="background:white;color:var(--primary);box-shadow:none;justify-content:center;">Sign Up Free</a>
+            <a href="{% url 'login' %}"
+                style="color:rgba(255,255,255,0.9);font-size:0.82rem;text-decoration:none;text-align:center;">Already a
+                member? Log in</a>
+        </div>
+    </div>
+</div>
+{% endif %}
 {{ block.super }}
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Handle Like AJAX
         document.querySelectorAll('.like-form').forEach(form => {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const btn = this.querySelector('button');
                 const icon = btn.querySelector('i');
                 const countSpan = btn.querySelector('.count');
-
                 fetch(this.action, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.liked) {
-                            icon.className = 'fas fa-heart';
-                            btn.classList.add('active');
-                        } else {
-                            icon.className = 'far fa-heart';
-                            btn.classList.remove('active');
-                        }
-                        countSpan.textContent = data.total_likes;
-                    });
+                }).then(r => r.json()).then(data => {
+                    icon.className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+                    btn.classList.toggle('active', data.liked);
+                    btn.classList.toggle('like-active', data.liked);
+                    if (data.liked) {
+                        icon.classList.add('heart-pop');
+                        setTimeout(() => icon.classList.remove('heart-pop'), 400);
+                    }
+                    countSpan.textContent = data.total_likes;
+                });
             });
         });
 
-        // Handle Bookmark AJAX
         document.querySelectorAll('.bookmark-form').forEach(form => {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const btn = this.querySelector('button');
                 const icon = btn.querySelector('i');
-
                 fetch(this.action, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.bookmarked) {
-                            icon.className = 'fas fa-bookmark';
-                            btn.classList.add('active');
-                        } else {
-                            icon.className = 'far fa-bookmark';
-                            btn.classList.remove('active');
-                        }
-                    });
+                }).then(r => r.json()).then(data => {
+                    icon.className = data.bookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+                    btn.classList.toggle('active', data.bookmarked);
+                });
             });
         });
     });

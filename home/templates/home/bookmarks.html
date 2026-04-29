@@ -1,110 +1,82 @@
 {% extends "home/base.html" %}
 
-{% block title %}Saved Posts - Bookish Brio{% endblock %}
+{% block title %}Saved Posts — Bookish Brio{% endblock %}
 
 {% block content %}
-<div class="bookmarks-container">
-    <div
-        style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-soft);">
-        <h1
-            style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 12px;">
-            <i class="fas fa-bookmark" style="color: var(--primary);"></i>
-            Saved Posts
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+    <div>
+        <h1 style="font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-0.3px;display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-bookmark" style="color:var(--primary);"></i> Saved Posts
         </h1>
-        <p style="color: var(--text-meta); font-size: 0.95rem; margin-top: 4px;">Posts you've saved for later</p>
+        <p style="color:var(--text-meta);font-size:0.85rem;margin-top:2px;">Posts you've bookmarked for later</p>
     </div>
+</div>
 
-    <div class="posts-feed">
-        {% if bookmarks %}
-        {% for bookmark in bookmarks %}
-        <article class="post-card" onclick="window.location.href=this.dataset.url;"
-            data-url="{% url 'post_detail' bookmark.post.pk %}">
-            <div class="post-main">
-                <div class="post-meta">
-                    <a href="{% url 'public_profile' bookmark.post.author.username %}" class="post-author"
-                        onclick="event.stopPropagation();">
-                        u/{{ bookmark.post.author.username }}
-                    </a>
-                    <span>•</span>
-                    <span>{{ bookmark.post.created_at|timesince }} ago</span>
-                </div>
-
-                <h2 class="post-title">{{ bookmark.post.title }}</h2>
-
-                <div class="post-content-preview"
-                    style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; font-size: 0.95rem; color: #4a4a4a;">
-                    {{ bookmark.post.preview_content }}
-                </div>
+<div class="posts-feed">
+    {% if bookmarks %}
+    {% for bookmark in bookmarks %}
+    <article class="post-card" onclick="window.location.href=this.dataset.url;" data-url="{% url 'post_detail' bookmark.post.pk %}">
+        <div class="post-main">
+            <div class="post-meta">
+                <div class="post-author-avatar">{{ bookmark.post.author.username|first|upper }}</div>
+                <a href="{% url 'public_profile' bookmark.post.author.username %}" class="post-author" onclick="event.stopPropagation();">{{ bookmark.post.author.username }}</a>
+                <span class="post-meta-dot">·</span>
+                <span>{{ bookmark.post.created_at|timesince }} ago</span>
+                <span class="post-meta-dot">·</span>
+                <span style="color:var(--primary);font-size:0.78rem;"><i class="fas fa-bookmark"></i> Saved {{ bookmark.created_at|timesince }} ago</span>
             </div>
-
-            <div class="post-actions">
-                <form action="{% url 'bookmark_post' bookmark.post.pk %}" method="POST" class="bookmark-form"
-                    onclick="event.stopPropagation();">
-                    {% csrf_token %}
-                    <button type="submit" class="action-btn active">
-                        <i class="fas fa-bookmark"></i>
-                        <span>Unsave</span>
-                    </button>
-                </form>
-                <a href="{% url 'post_detail' bookmark.post.pk %}" class="action-btn"
-                    onclick="event.stopPropagation();">
-                    <i class="far fa-eye"></i>
-                    <span>Read Full</span>
-                </a>
-            </div>
-        </article>
-        {% endfor %}
-        {% else %}
-        <div
-            style="background: white; padding: 80px 40px; text-align: center; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-soft);">
-            <div style="margin-bottom: 24px; opacity: 0.1;">
-                <i class="fas fa-bookmark fa-4x"></i>
-            </div>
-            <h3
-                style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">
-                Nothing saved yet</h3>
-            <p style="font-size: 1rem; color: var(--text-meta);">Posts you save will appear here for easy access later.
-            </p>
-            <a href="{% url 'index' %}" class="btn-orange" style="margin-top: 24px;">Explore Feed</a>
+            <h2 class="post-title">{{ bookmark.post.title }}</h2>
+            <div class="post-content-preview" style="-webkit-line-clamp:2;">{{ bookmark.post.preview_content }}</div>
         </div>
-        {% endif %}
+        <div class="post-actions">
+            <a href="{% url 'post_detail' bookmark.post.pk %}" class="action-btn" onclick="event.stopPropagation();">
+                <i class="far fa-eye"></i> Read
+            </a>
+            <form action="{% url 'bookmark_post' bookmark.post.pk %}" method="POST" class="bookmark-form" onclick="event.stopPropagation();" style="margin-left:auto;">
+                {% csrf_token %}
+                <button type="submit" class="action-btn active">
+                    <i class="fas fa-bookmark"></i> <span>Unsave</span>
+                </button>
+            </form>
+        </div>
+    </article>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-bookmark"></i></div>
+        <h3>Nothing saved yet</h3>
+        <p>Tap the bookmark icon on any post to save it here.</p>
+        <a href="{% url 'index' %}" class="btn-orange">Explore Feed</a>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.bookmark-form').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const btn = this.querySelector('button');
-                fetch(this.action, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.bookmarked) {
-                            const card = this.closest('.post-card');
-                            card.style.opacity = '0.4';
-                            card.style.pointerEvents = 'none';
-                            card.style.transform = 'scale(0.98)';
-                            btn.innerHTML = '<i class="far fa-bookmark"></i><span>Removed</span>';
-                            btn.classList.remove('active');
-
-                            setTimeout(() => {
-                                card.style.display = 'none';
-                                // Check if list is empty
-                                const feed = document.querySelector('.posts-feed');
-                                if (feed.querySelectorAll('.post-card[style*="display: none"]').length === feed.querySelectorAll('.post-card').length) {
-                                    window.location.reload(); // Quick way to show empty state
-                                }
-                            }, 300);
-                        }
-                    });
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.bookmark-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            fetch(this.action, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': window.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(r => r.json()).then(data => {
+                if (!data.bookmarked) {
+                    const card = this.closest('.post-card');
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        card.remove();
+                        const feed = document.querySelector('.posts-feed');
+                        if (!feed.querySelector('.post-card')) window.location.reload();
+                    }, 300);
+                }
             });
         });
     });
+});
 </script>
 {% endblock %}
