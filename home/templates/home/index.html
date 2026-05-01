@@ -812,14 +812,6 @@
         {% if user.is_authenticated %}Stories from the community{% else %}Join to personalise your reading{% endif %}
       </p>
     </div>
-
-    <div class="filter-row">
-      <a href="{% url 'index' %}" class="chip {% if not request.GET.sort %}chip-active{% else %}chip-default{% endif %}">✦ Latest</a>
-      <a href="{% url 'trending' %}" class="chip chip-default">🔥 Trending</a>
-      {% if user.is_authenticated %}
-      <a href="{% url 'bookmarks' %}" class="chip chip-default">🔖 Saved</a>
-      {% endif %}
-    </div>
   </div>
 
   <!-- ── Messages ────────────────────────────── -->
@@ -1004,34 +996,6 @@
 
 
 {% block sidebar %}
-
-<!-- Trending Topics -->
-<div class="sw-editorial">
-  <div class="sw-head"><i class="fas fa-hashtag"></i> Trending Topics</div>
-  <div class="sw-body">
-    {% if trending_tags %}
-    {% for tag in trending_tags %}
-    <a href="?q={{ tag.name }}" class="trending-row">
-      <div class="trending-row-left">
-        <span class="trending-num">#{{ forloop.counter }}</span>
-        <span class="trending-label">{{ tag.name }}</span>
-      </div>
-      <span class="trending-badge">{{ tag.post_count }}</span>
-    </a>
-    {% endfor %}
-    {% else %}
-    <div class="tag-cloud">
-      <a href="?q=fiction"  class="tag-cloud-pill">#fiction</a>
-      <a href="?q=poetry"   class="tag-cloud-pill">#poetry</a>
-      <a href="?q=mystery"  class="tag-cloud-pill">#mystery</a>
-      <a href="?q=scifi"    class="tag-cloud-pill">#scifi</a>
-      <a href="?q=romance"  class="tag-cloud-pill">#romance</a>
-      <a href="?q=thriller" class="tag-cloud-pill">#thriller</a>
-      <a href="?q=essay"    class="tag-cloud-pill">#essay</a>
-    </div>
-    {% endif %}
-  </div>
-</div>
 
 <!-- Join CTA (unauthenticated only) -->
 {% if not user.is_authenticated %}
